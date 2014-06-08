@@ -11,13 +11,23 @@ handlers:
 
 - url: /images
   static_dir: images
-  
+
 - url: /scripts
   static_dir: scripts
-  
-- url: /.*
-  script: saver.app
 
+# Twitter Bootstrap
+- url: /bootstrap
+  static_dir: bootstrap
+
+# Handler for front page
+- url: /
+  script: front.app
+  
+# All other pages require login
+- url: /.*
+  login: required
+  script: saver.app
+  
 libraries:
 - name: jinja2
   version: latest

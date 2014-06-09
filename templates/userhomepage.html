@@ -1,28 +1,47 @@
-<html>
-<head>
-	<title> $AVER - user</title>
-    <link href="../bootstrap/css/bootstrap.css" rel="stylesheet">
-	<link type="text/css" rel="stylesheet" href="../stylesheets/main.css">
-</head>
-<body>
-	<div align="center">
-		<a href = "/user"><img src="../images/header.png" id="header"></a>
-		</br>
-		</br>
-		<span>{{user_mail}}<a href="{{logout}}">logout</a></span></br>
-		<div class="row">
-			<div class="span6">
-				<ul class="nav nav-tabs nav-stacked">
-				<li><a href "#">Manage</a></li>
-				<li><a href "#">Overview</a></li>
-				<li><a href "#">Leaderboard</a></li>
-				<li><a href "#">About</a></li>
-				</ul>
+	<html>
+	<head>
+		<title> $AVER - user</title>
+		<link href="../bootstrap/css/bootstrap.css" rel="stylesheet">
+		<link type="text/css" rel="stylesheet" href="../stylesheets/main.css">
+	</head>
+	<body>
+		<div align="center">
+			<div class="well" id="header">
+			<a class="header" href = "/user">$AVER</a>
 			</div>
-			<div class="span8">
-				<p>abc</p>
+			<div>
+			<!--<span>{{user_mail}}<a href="{{logout}}">logout</a></span>-->
 			</div>
+			<table class="content">
+				<tr><td class="span2">
+					<ul class="nav nav-tabs nav-stacked">
+					<li><a href "/manage">Manage</a></li>
+					<li><a href "/overview">Overview</a></li>
+					<li><a href "/leaderboard">Leaderboard</a></li>
+					<li><a href "/about">About</a></li>
+					</ul>
+					<ul class="nobullet">
+						<li><u>Leaderboard</u></li>
+						<li>1.</li>
+						<li>2.</li>
+						<li>3.</li>
+					</ul>
+				</td>
+				<td>
+				<table  class="span8" id="content">
+					<tr><td>
+					<ul class="nobullet">
+						<li><u>Overview</u></li>
+						<li>1.</li>
+						<li>2.</li>
+						<li>3.</li>
+						<li>1.</li>
+						<li>2.</li>
+						<li>3.</li>
+					</ul>
+					</td></tr>
+				</table>
+			</table>
 		</div>
-	</div>
-</body>
-</html>
+	</body>
+	</html>

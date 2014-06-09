@@ -1,27 +1,34 @@
-#header{
-	width: 100%;
+@font-face {
+    font-family: Comic Sans MS;
+    src: url(comic.ttf);
 }
 
-#homepic{
-	width: 80%;
+#header {
+	background-color: #666666;
+	color: #FFE713;
+	font-family: Comic Sans	MS;
+	font-size:350%;
+	text-align:left;
+	vertical-align: top;
 }
 
-#inline{
-	display: inline;
+a.header, a.header:hover{
+	color: #FFE713;
+	text-decoration: none;
 }
 
-table.menu{
-	width: 30%;
-	text-align: center;
-	background-color: #FF9900;
-	font-size: 40px;
-	vertical-align: middle;
+li.menu{
+	height: 10%;
 }
 
-td.content{
-	height: 200px;
-	text-align: center;
-	background-color: #FFE599;
-	font-size: 40px;
-	vertical-align: middle;
+#homepic {
+	position:fixed;
+}
+
+.nobullet{
+	list-style-type: none;
+}
+
+#content{
+	border: 1px solid black;
 }

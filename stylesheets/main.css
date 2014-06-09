@@ -1,13 +1,24 @@
-table.menu{
-		width: 300px;
-		text-align: center;
-		background-color: #FF9900;
-		font-size: 40px;
-		vertical-align: middle;
+#header{
+	width: 100%;
 }
 
-table.content{
-	width: 750px;
+#homepic{
+	width: 80%;
+}
+
+#inline{
+	display: inline;
+}
+
+table.menu{
+	width: 30%;
+	text-align: center;
+	background-color: #FF9900;
+	font-size: 40px;
+	vertical-align: middle;
+}
+
+td.content{
 	height: 200px;
 	text-align: center;
 	background-color: #FFE599;

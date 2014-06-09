@@ -1,31 +1,28 @@
 <html>
 <head>
 	<title> $AVER - user</title>
+    <link href="../bootstrap/css/bootstrap.css" rel="stylesheet">
 	<link type="text/css" rel="stylesheet" href="../stylesheets/main.css">
 </head>
 <body>
 	<div align="center">
-		<a href = "/user"><img src="../images/header.png"></a>
+		<a href = "/user"><img src="../images/header.png" id="header"></a>
 		</br>
 		</br>
-		<span>{{user_mail}}<a href="{{logout}}">logout</a></span>
-		<table>
-		<tr>
-		<td>
-			<table  class = "menu">
-			<tr><td>Manage</td></tr>
-			<tr><td>Overview</td></tr>
-			<tr><td>Leaderboard</td></tr>
-			<tr><td>About</td></tr>
-			</table>
-		</td>
-		<td>
-			<table class = "content">
-			<tr><td><u>Overview</u></td></tr>
-			</table>
-		</td>
-		</tr>
-		</table>
+		<span>{{user_mail}}<a href="{{logout}}">logout</a></span></br>
+		<div class="row">
+			<div class="span6">
+				<ul class="nav nav-tabs nav-stacked">
+				<li><a href "#">Manage</a></li>
+				<li><a href "#">Overview</a></li>
+				<li><a href "#">Leaderboard</a></li>
+				<li><a href "#">About</a></li>
+				</ul>
+			</div>
+			<div class="span8">
+				<p>abc</p>
+			</div>
+		</div>
 	</div>
 </body>
 </html>

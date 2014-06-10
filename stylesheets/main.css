@@ -8,8 +8,13 @@
 	color: #FFE713;
 	font-family: Comic Sans	MS;
 	font-size:350%;
-	text-align:left;
-	vertical-align: top;
+	padding-top: 18px;
+	padding-bottom: 20px;
+}
+
+#leaderboard {
+	background-color: white;
+	margin-left: 0px;
 }
 
 a.header, a.header:hover{
@@ -29,6 +34,6 @@ li.menu{
 	list-style-type: none;
 }
 
-#content{
-	border: 1px solid black;
+#content > td{
+	vertical-align:top;
 }

@@ -5,13 +5,14 @@
 		<link type="text/css" rel="stylesheet" href="../stylesheets/main.css">
 	</head>
 	<body>
-		<div align="center">
+		<center>
 			<div class="well" id="header">
 			<a class="header" href = "/user">$AVER</a>
 			</div>
 			<div>
 			<!--<span>{{user_mail}}<a href="{{logout}}">logout</a></span>-->
 			</div>
+			<div class="container">
 			<table class="content">
 				<tr><td class="span2">
 					<ul class="nav nav-tabs nav-stacked">
@@ -20,7 +21,7 @@
 					<li><a href "/leaderboard">Leaderboard</a></li>
 					<li><a href "/about">About</a></li>
 					</ul>
-					<ul class="nobullet">
+					<ul class="well nobullet span2" id="leaderboard">
 						<li><u>Leaderboard</u></li>
 						<li>1.</li>
 						<li>2.</li>
@@ -28,20 +29,38 @@
 					</ul>
 				</td>
 				<td>
-				<table  class="span8" id="content">
+				<table class="span8" id="content">
 					<tr><td>
-					<ul class="nobullet">
-						<li><u>Overview</u></li>
-						<li>1.</li>
-						<li>2.</li>
-						<li>3.</li>
-						<li>1.</li>
-						<li>2.</li>
-						<li>3.</li>
-					</ul>
+						<ul class="well nobullet" 	>
+							<li><u>Overview</u></li>
+							<li></br></li>
+							<li>Total Expenses:</li>
+							<li>Budget Available:</li>
+							<li></br></li>
+							<li><u>Latest Transaction</u></li>
+							<table class="table table-bordered">
+							<li></br></li>
+							<tr>
+								<th>Description</th>
+								<th>Date</th>
+								<th>Amount</th>
+							</tr>
+							<tr>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							</table>
+						</ul>
 					</td></tr>
 				</table>
 			</table>
-		</div>
+			</div>
+		</center>
 	</body>
 	</html>

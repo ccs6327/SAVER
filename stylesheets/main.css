@@ -32,6 +32,7 @@ li.menu{
 
 .nobullet{
 	list-style-type: none;
+<<<<<<< HEAD
 }
 
 #content > td{
@@ -47,3 +48,6 @@ li.menu{
 	font-size: 40px;
 }
 
+=======
+}
+>>>>>>> 9526059b7998dbd0a654d79b896f940af46e56d6

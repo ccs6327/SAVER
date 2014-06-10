@@ -33,7 +33,3 @@ li.menu{
 .nobullet{
 	list-style-type: none;
 }
-
-#content > td{
-	vertical-align:top;
-}

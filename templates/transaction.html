@@ -1,0 +1,64 @@
+	<html>
+	<head>
+		<title> $AVER - user</title>
+		<link href="../bootstrap/css/bootstrap.css" rel="stylesheet">
+		<link type="text/css" rel="stylesheet" href="../stylesheets/main.css">
+	</head>
+	<body>
+		<center>
+			<div class="well" id="header">
+			<a class="header" href = "/user">$AVER</a>
+			</div>
+			<div>
+			<!--<span>{{user_mail}}<a href="{{logout}}">logout</a></span>-->
+			</div>
+			<div class="container">
+			<table class="content">
+				<tr>
+					<td class="span2">
+						<ul class="nav nav-tabs nav-stacked">
+						<li><a href="/manage">Manage</a></li>
+						<li><a href="/overview">Overview</a></li>
+						<li><a href="/leaderboard">Leaderboard</a></li>
+						<li><a href="/about">About</a></li>
+						</ul>
+					</td>
+					<td>
+						<table class="span8">
+							<tr>
+								<td>
+									<form class="well">
+										<label>Description:</label>
+										<input type="text" name="description" class="span6">
+										</br>
+										<label>Tag:</label>
+										<div class="radio">
+										<label class="span2"><input type="radio" name="tag" value="food">Food</label>
+										<label class="span2"><input type="radio" name="tag" value="entertainment">Entertainment</label>
+										<label class="span2"><input type="radio" name="tag" value="accommodation">Accommodation</label>
+										<label class="span2"><input type="radio" name="tag" value="transport">Transport</label>
+										<label class="span2"><input type="radio" name="tag" value="savings">Savings</label>
+										<label class="span2"><input type="radio" name="tag" value="income">Income</label>
+										<label class="span2"><input type="radio" name="tag" value="others">Others</label>
+										</div>
+										</br>
+										</br>
+										</br>
+										<label>Amount:</label>
+										<input type="text" name="amount" class="span6" value="$">
+										<label>Date:</label>
+										<input type="date" name="inputdate">
+										</br>
+										</br>
+										<button class="btn btn-primary">Add Item</button>
+									</form>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+			</div>
+		</center>
+	</body>
+	</html>

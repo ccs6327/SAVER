@@ -1,0 +1,64 @@
+<html>
+	<head>
+		<title> $AVER - Monthly Budget</title>
+		<link href="../bootstrap/css/bootstrap.css" rel="stylesheet">
+		<link type="text/css" rel="stylesheet" href="../stylesheets/main.css">
+	</head>
+	<body>
+		<center>
+			<div class="well" id="header">
+			<a class="header" href = "/user">$AVER</a>
+			</div>
+			<div>
+			<!--<span>{{user_mail}}<a href="{{logout}}">logout</a></span>-->
+			</div>
+			<div class="container">
+			<table>
+				<tr>
+					<td class="span2">
+						<ul class="nav nav-tabs nav-stacked">
+						<li class="active"><a href="/manage">Manage</a></li>
+						<li><a href="/overview">Overview</a></li>
+						<li><a href="/leaderboard">Leaderboard</a></li>
+						<li><a href="/about">About</a></li>
+						</ul>
+					</td>
+					<td>
+						<div class="well span8">
+							<ul class="nav nav-pills">
+							<li class="active"><a href="/monthlybudget">Monthly</a></i>
+							<li><a href="/yearlybudget">Yearly</a></i>
+							</ul>
+						<form class="form-inline" align="right">
+							<label>Food:</label>
+							<input type="text" name="food" class="span6" value="$">
+							</br>
+							<label>Entertainment:</label>
+							<input type="text" name="entertainment" class="span6" value="$">
+							</br>
+							<label>Accommodation:</label>
+							<input type="text" name="accommodation" class="span6" value="$">
+							</br>
+							<label>Transport:</label>
+							<input type="text" name="transport" class="span6" value="$">
+							</br>
+							<label>Savings:</label>
+							<input type="text" name="savings" class="span6" value="$">
+							</br>
+							<label>Income:</label>
+							<input type="text" name="income" class="span6" value="$">
+							</br>
+							<label>Others:</label>
+							<input type="text" name="others" class="span6" value="$">
+							</br>
+							</br>
+							<a href="/budgetsuccessful" class="btn btn-primary btn-block">Set Budget</a>
+						</form>
+						</div>
+					</td>
+				</tr>
+			</table>
+			</div>
+		</center>
+	</body>
+</html>

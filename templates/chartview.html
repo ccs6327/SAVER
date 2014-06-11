@@ -1,0 +1,56 @@
+<html>
+	<head>
+		<title> $AVER - Summary</title>
+		<link href="../bootstrap/css/bootstrap.css" rel="stylesheet">
+		<link type="text/css" rel="stylesheet" href="../stylesheets/main.css"><script type="text/javascript" src="https://www.google.com/jsapi"></script>
+		<script type="text/javascript">
+			google.load("visualization", "1", {packages:["corechart"]});
+			google.setOnLoadCallback(drawChart);
+			function drawChart() {
+				var data = google.visualization.arrayToDataTable([
+				['Expenditure', '$'],
+				['Food', 400],
+				['Entertainment', 600],
+				['Accommodation', 500],
+				['Transport', 150],
+				['Savings', 650],
+				['Others', 150]
+				]);
+
+				var options = {
+					title: 'Expenditure Chart'
+				};
+
+				var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+				chart.draw(data, options);
+			}
+		</script>
+	</head>
+	<body>
+		<center>
+			<div class="well" id="header">
+			<a class="header" href = "/user">$AVER</a>
+			</div>
+			<div>
+			<!--<span>{{user_mail}}<a href="{{logout}}">logout</a></span>-->
+			</div>
+			<div class="container">
+			<table>
+				<tr>
+					<td class="span2">
+						<ul class="nav nav-tabs nav-stacked">
+						<li><a href="/manage">Manage</a></li>
+						<li><a href="/overview">Overview</a></li>
+						<li><a href="/leaderboard">Leaderboard</a></li>
+						<li><a href="/about">About</a></li>
+						</ul>
+					</td>
+					<td>
+						<div id="piechart" style="width: 700px; height: 500px;"></div>
+					</td>
+				</tr>
+			</table>
+			</div>
+		</center>
+	</body>
+</html>

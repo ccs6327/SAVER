@@ -3,23 +3,28 @@
     src: url(comic.ttf);
 }
 
-#header {
+.header {
 	background-color: #666666;
-	color: #FFE713;
 	font-family: Comic Sans	MS;
-	font-size:350%;
-	padding-top: 18px;
-	padding-bottom: 20px;
+	padding-bottom: 10px;
+	color: white;
+}
+
+a.header, a.header:hover{
+	font-size: 350%;
+	color: #FFE713;
+	text-decoration: none;
+	background-color:transparent;
+}
+
+a.logout, a.logout:hover{
+	color: red;
+	text-decoration: none;
 }
 
 #leaderboard {
 	background-color: white;
 	margin-left: 0px;
-}
-
-a.header, a.header:hover{
-	color: #FFE713;
-	text-decoration: none;
 }
 
 li.menu{

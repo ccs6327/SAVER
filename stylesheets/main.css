@@ -39,15 +39,12 @@ li.menu{
 	list-style-type: none;
 }
 
-.leaderboardInner{
-	position: relative; 
-	background-color: orange;
-	width: 100%;
-	display: inline-block;
-	text-align: center;
-	font-size: 40px;
-}
-
 #msgbox {
 	background-color: #EAEAEA;
 }
+
+.tipssharing{
+	position: relative;
+	left: 450px;
+}
+	

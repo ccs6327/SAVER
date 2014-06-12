@@ -172,6 +172,125 @@ class ChartViewPage(webapp2.RequestHandler):
         else:
             self.redirect(self.request.host_url)
 
+class LeaderboardPage(webapp2.RequestHandler):
+    """ Handler for the leaderboard page"""
+
+    def get(self):
+        user = users.get_current_user()
+        if user: #signed in already
+            template_values = {
+                'user_mail': users.get_current_user().email(),
+                'logout': users.create_logout_url(self.request.host_url),
+            }
+            template = jinja_environment.get_template('leaderboard.html')
+            self.response.out.write(template.render(template_values))
+        else:
+            self.redirect(self.request.host_url)
+
+class WeeklyBestSaverPage(webapp2.RequestHandler):
+    """ Handler for the weekly best saver page"""
+
+    def get(self):
+        user = users.get_current_user()
+        if user: #signed in already
+            template_values = {
+                'user_mail': users.get_current_user().email(),
+                'logout': users.create_logout_url(self.request.host_url),
+            }
+            template = jinja_environment.get_template('weeklyBestSaver.html')
+            self.response.out.write(template.render(template_values))
+        else:
+            self.redirect(self.request.host_url)
+
+class YearlyBestSaverPage(webapp2.RequestHandler):
+    """ Handler for the yearly best saver page"""
+
+    def get(self):
+        user = users.get_current_user()
+        if user: #signed in already
+            template_values = {
+                'user_mail': users.get_current_user().email(),
+                'logout': users.create_logout_url(self.request.host_url),
+            }
+            template = jinja_environment.get_template('yearlyBestSaver.html')
+            self.response.out.write(template.render(template_values))
+        else:
+            self.redirect(self.request.host_url)
+
+class AboutPage(webapp2.RequestHandler):
+    """ Handler for the about page"""
+
+    def get(self):
+        user = users.get_current_user()
+        if user: #signed in already
+            template_values = {
+                'user_mail': users.get_current_user().email(),
+                'logout': users.create_logout_url(self.request.host_url),
+            }
+            template = jinja_environment.get_template('about.html')
+            self.response.out.write(template.render(template_values))
+        else:
+            self.redirect(self.request.host_url)
+
+class TipsSharingFormPage(webapp2.RequestHandler):
+    """ Handler for the tips sharing form page"""
+
+    def get(self):
+        user = users.get_current_user()
+        if user: #signed in already
+            template_values = {
+                'user_mail': users.get_current_user().email(),
+                'logout': users.create_logout_url(self.request.host_url),
+            }
+            template = jinja_environment.get_template('tipssharingform.html')
+            self.response.out.write(template.render(template_values))
+        else:
+            self.redirect(self.request.host_url)
+
+class TipsSharingPage(webapp2.RequestHandler):
+    """ Handler for the tips sharing page"""
+
+    def get(self):
+        user = users.get_current_user()
+        if user: #signed in already
+            template_values = {
+                'user_mail': users.get_current_user().email(),
+                'logout': users.create_logout_url(self.request.host_url),
+            }
+            template = jinja_environment.get_template('tipssharing.html')
+            self.response.out.write(template.render(template_values))
+        else:
+            self.redirect(self.request.host_url)
+
+class SharingSuccessfulPage(webapp2.RequestHandler):
+    """ Handler for the tips sharing page"""
+
+    def get(self):
+        user = users.get_current_user()
+        if user: #signed in already
+            template_values = {
+                'user_mail': users.get_current_user().email(),
+                'logout': users.create_logout_url(self.request.host_url),
+            }
+            template = jinja_environment.get_template('tipssharingsuccessful.html')
+            self.response.out.write(template.render(template_values))
+        else:
+            self.redirect(self.request.host_url)
+
+class SharingPostPage(webapp2.RequestHandler):
+    """ Handler for the tips sharing page"""
+
+    def get(self):
+        user = users.get_current_user()
+        if user: #signed in already
+            template_values = {
+                'user_mail': users.get_current_user().email(),
+                'logout': users.create_logout_url(self.request.host_url),
+            }
+            template = jinja_environment.get_template('tipssharingpost.html')
+            self.response.out.write(template.render(template_values))
+        else:
+            self.redirect(self.request.host_url)
 
 
 app = webapp2.WSGIApplication([('/user', UserPage),
@@ -184,5 +303,13 @@ app = webapp2.WSGIApplication([('/user', UserPage),
                                ('/overview', OverviewPage),
                                ('/summary', SummaryPage),
                                ('/history', TransactionHistoryPage),
-                               ('/chart', ChartViewPage)],
+                               ('/chart', ChartViewPage),
+                               ('/leaderboard', LeaderboardPage),
+                               ('/weeklybestsaver', WeeklyBestSaverPage),
+                               ('/yearlybestsaver', YearlyBestSaverPage),
+                               ('/about', AboutPage),
+                               ('/tipssharingform', TipsSharingFormPage),
+                               ('/tipssharing', TipsSharingPage),
+                               ('/sharingformsuccessful', SharingSuccessfulPage),
+                               ('/sharingpost', SharingPostPage)],
                                debug=True)

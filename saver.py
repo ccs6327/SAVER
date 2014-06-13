@@ -197,7 +197,7 @@ class WeeklyBestSaverPage(webapp2.RequestHandler):
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
             }
-            template = jinja_environment.get_template('weeklyBestSaver.html')
+            template = jinja_environment.get_template('weeklybestsaver.html')
             self.response.out.write(template.render(template_values))
         else:
             self.redirect(self.request.host_url)
@@ -212,7 +212,7 @@ class YearlyBestSaverPage(webapp2.RequestHandler):
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
             }
-            template = jinja_environment.get_template('yearlyBestSaver.html')
+            template = jinja_environment.get_template('yearlybestsaver.html')
             self.response.out.write(template.render(template_values))
         else:
             self.redirect(self.request.host_url)

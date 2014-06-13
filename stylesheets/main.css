@@ -44,7 +44,6 @@ li.menu{
 }
 
 .tipssharing{
-	position: relative;
-	left: 550px;
+	float: right;
 }
 	

@@ -1,8 +1,11 @@
+<!DOCTYPE HTML>
 <html>
 	<head>
 		<title> $AVER - New Transaction</title>
 		<link href="../bootstrap/css/bootstrap.css" rel="stylesheet">
 		<link type="text/css" rel="stylesheet" href="../stylesheets/main.css">
+		<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.1.min.js"></script>
+		<script src="../bootstrap/js/bootstrap.min.js"></script>
 	</head>
 	<body>
 		<center>
@@ -24,13 +27,13 @@
 						</ul>
 					</td>
 					<td>
-						<form class="well span8">
+						<form class="well span8" action="/transuccessful" method="post">
 							<label>Description:</label>
-							<input type="text" name="description" class="span7">
+							<input type="text" name="description" class="span7" required>
 							</br>
 							<label>Tag:</label>
 							<div class="radio">
-								<label class="span2"><input type="radio" name="tag" value="food">Food</label>
+								<label class="span2"><input type="radio" name="tag" value="food" checked>Food</label>
 								<label class="span2"><input type="radio" name="tag" value="entertainment">Entertainment</label>
 								<label class="span2"><input type="radio" name="tag" value="accommodation">Accommodation</label>
 								<label class="span2"><input type="radio" name="tag" value="transport">Transport</label>
@@ -42,17 +45,32 @@
 							</br>
 							</br>
 							<label>Amount:</label>
-							<input type="text" name="amount" class="span3" value="$">
+							<input type="number" min="0.01" step="0.01" name="amount" class="two-digits span3" placeholder="$" required>
 							<label>Date:</label>
-							<input type="date" name="inputdate">
+							<input type="date" name="date" id="today" required>
 							</br>
 							</br>
-							<a href="/transuccessful" class="btn btn-primary btn-block">Add Item</a>
+							<input type="submit" value="Add Item" class="btn btn-primary btn-block">
 						</form>
 					</td>
 				</tr>
 			</table>
 			</div>
 		</center>
+		<script>
+			$(document).ready(function() {
+				var date = new Date();
+
+				var day = date.getDate();
+				var month = date.getMonth() + 1;
+				var year = date.getFullYear();
+	
+				if (month < 10) month = "0" + month;
+				if (day < 10) day = "0" + day;
+			
+				var today = year + "-" + month + "-" + day;       
+				$("#today").attr("value", today);
+			});
+		</script>
 	</body>
 </html>

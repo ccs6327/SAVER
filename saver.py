@@ -1,8 +1,10 @@
 import webapp2
 import jinja2
 import os
+import datetime
 
 from google.appengine.api import users
+from google.appengine.ext import ndb
 
 jinja_environment = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__) + "/templates"))
@@ -52,21 +54,66 @@ class TransactionPage(webapp2.RequestHandler):
         else:
             self.redirect(self.request.host_url)
 
+class Transaction(ndb.Model):
+    # Models a transaction with description, tag, amount, date.
+    user = ndb.UserProperty(auto_current_user_add=True)
+    description = ndb.StringProperty()
+    tag = ndb.StringProperty()
+    amount = ndb.FloatProperty()
+    date = ndb.DateProperty()
+
 class TransactionSuccessfulPage(webapp2.RequestHandler):
     """ Handler for the transaction added successful page"""
 
-    def get(self):
+    def post(self):
         user = users.get_current_user()
         if user: #signed in already
+            amount = self.request.get('amount')
+            description = self.request.get('description')
+            tag = self.request.get('tag')
+            date = self.request.get('date')
+            
+            #turn amount input into two digits amount
+            if "." not in amount:
+                amount = amount + ".00"
+            else:
+                dollar_cent = amount.split(".")
+                cent = dollar_cent[1]
+                if len(cent) > 2:
+                    amount = dollar_cent[0] + "." + dollar_cent[1][:2]
+                elif len(cent) == 1:
+                    amount = dollar_cent[0] + "." + dollar_cent[1] + "0"
+                elif len(cent) == 0:
+                    amount = dollar_cent[0] + "." + "00"                    
+
+            #turn string date into a date variable
+            year_month_day = date.split("-")
+            year = int(year_month_day[0])
+            month = int(year_month_day[1])
+            day = int(year_month_day[2])
+            date = datetime.date(year, month, day)
+            
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
+                'desc': description,
+                'tag': tag,
+                'amount': amount,
+                'date': date
             }
+
+            transaction = Transaction()
+            transaction.description = description
+            transaction.tag = tag
+            transaction.amount = float(amount)
+            transaction.date = date
+            transaction.put()
+            
             template = jinja_environment.get_template('transactionsuccessful.html')
             self.response.out.write(template.render(template_values))
         else:
             self.redirect(self.request.host_url)
-
+                
 class MonthlyBudgetPage(webapp2.RequestHandler):
     """ Handler for monthly budget page"""
 

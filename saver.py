@@ -2,12 +2,27 @@ import webapp2
 import jinja2
 import os
 import datetime
+import logging
 
 from google.appengine.api import users
 from google.appengine.ext import ndb
 
 jinja_environment = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__) + "/templates"))
+
+def two_digits(amount):
+    #turn amount input into two digits amount
+    if "." not in amount:
+        return amount + ".00"
+    else:
+        dollar_cent = amount.split(".")
+        cent = dollar_cent[1]
+        if len(cent) > 2:
+            return dollar_cent[0] + "." + dollar_cent[1][:2]
+        elif len(cent) == 1:
+            return dollar_cent[0] + "." + dollar_cent[1] + "0"
+        elif len(cent) == 0:
+            return dollar_cent[0] + "." + "00"
 
 class UserPage(webapp2.RequestHandler):
     """ Handler for the front page after user login."""
@@ -68,24 +83,13 @@ class TransactionSuccessfulPage(webapp2.RequestHandler):
     def post(self):
         user = users.get_current_user()
         if user: #signed in already
-            amount = self.request.get('amount')
+
+            #get the value from the transaction form
+            amount = two_digits(self.request.get('amount'))
             description = self.request.get('description')
             tag = self.request.get('tag')
             date = self.request.get('date')
             
-            #turn amount input into two digits amount
-            if "." not in amount:
-                amount = amount + ".00"
-            else:
-                dollar_cent = amount.split(".")
-                cent = dollar_cent[1]
-                if len(cent) > 2:
-                    amount = dollar_cent[0] + "." + dollar_cent[1][:2]
-                elif len(cent) == 1:
-                    amount = dollar_cent[0] + "." + dollar_cent[1] + "0"
-                elif len(cent) == 0:
-                    amount = dollar_cent[0] + "." + "00"                    
-
             #turn string date into a date variable
             year_month_day = date.split("-")
             year = int(year_month_day[0])
@@ -102,6 +106,7 @@ class TransactionSuccessfulPage(webapp2.RequestHandler):
                 'date': date
             }
 
+            # construct Transaction object and store into database
             transaction = Transaction()
             transaction.description = description
             transaction.tag = tag
@@ -144,16 +149,60 @@ class YearlyBudgetPage(webapp2.RequestHandler):
         else:
             self.redirect(self.request.host_url)
 
+class Budgets(ndb.Model):
+    # Models a budget which contain every tags' amount and period(monthly or yearly)
+    user = ndb.UserProperty(auto_current_user_add=True)
+    period = ndb.StringProperty()
+    income = ndb.FloatProperty()
+    food = ndb.FloatProperty()
+    entertainment = ndb.FloatProperty()
+    accommodation = ndb.FloatProperty()
+    transport = ndb.FloatProperty()
+    savings = ndb.FloatProperty()
+    others = ndb.FloatProperty()
+
 class BudgetSuccessfulPage(webapp2.RequestHandler):
     """ Handler for the budget set successful page"""
 
-    def get(self):
+    def post(self):
         user = users.get_current_user()
         if user: #signed in already
+
+            #get the value from transaction form
+            period = self.request.get('setbudget').split(' ')[1]
+            income = two_digits(self.request.get('income'))
+            food = two_digits(self.request.get('food'))
+            entertainment = two_digits(self.request.get('entertainment'))
+            accommodation = two_digits(self.request.get('accommodation'))
+            transport = two_digits(self.request.get('transport'))
+            savings = two_digits(self.request.get('savings'))
+            others = two_digits(self.request.get('others'))
+            
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
+                'period': period,
+                'income': income,
+                'food': food,
+                'entertainment': entertainment,
+                'accommodation': accommodation,
+                'transport': transport,
+                'savings': savings,
+                'others': others
             }
+
+            # construct Budgets object and store into database
+            budgets = Budgets()
+            budgets.period = period
+            budgets.income = float(income)
+            budgets.food = float(food)
+            budgets.entertainment = float(entertainment)
+            budgets.accommodation = float(accommodation)
+            budgets.transport = float(transport)
+            budgets.savings = float(savings)
+            budgets.others = float(others)
+            budgets.put()
+            
             template = jinja_environment.get_template('budgetsuccessful.html')
             self.response.out.write(template.render(template_values))
         else:

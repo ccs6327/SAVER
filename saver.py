@@ -12,6 +12,11 @@ jinja_environment = jinja2.Environment(
 
 def two_digits(amount):
     #turn amount input into two digits amount
+
+    #remove extra "0" in the amount variable
+    amount = float(amount)
+    amount = str(amount)
+
     if "." not in amount:
         return amount + ".00"
     else:

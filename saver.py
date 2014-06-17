@@ -23,6 +23,8 @@ def two_digits(amount):
             return dollar_cent[0] + "." + dollar_cent[1] + "0"
         elif len(cent) == 0:
             return dollar_cent[0] + "." + "00"
+        else:
+            return amount
 
 class UserPage(webapp2.RequestHandler):
     """ Handler for the front page after user login."""
@@ -74,7 +76,7 @@ class Transaction(ndb.Model):
     user = ndb.UserProperty(auto_current_user_add=True)
     description = ndb.StringProperty()
     tag = ndb.StringProperty()
-    amount = ndb.FloatProperty()
+    amount = ndb.StringProperty()
     date = ndb.DateProperty()
 
 class TransactionSuccessfulPage(webapp2.RequestHandler):
@@ -110,7 +112,7 @@ class TransactionSuccessfulPage(webapp2.RequestHandler):
             transaction = Transaction()
             transaction.description = description
             transaction.tag = tag
-            transaction.amount = float(amount)
+            transaction.amount = amount
             transaction.date = date
             transaction.put()
             
@@ -124,10 +126,40 @@ class MonthlyBudgetPage(webapp2.RequestHandler):
 
     def get(self):
         user = users.get_current_user()
+                        
         if user: #signed in already
+            
+            info = Budgets.query(Budgets.user == user, Budgets.period == 'Monthly').fetch()
+            #initialize value to empty string
+            income = ''
+            food = ''
+            entertainment = ''
+            accommodation = ''
+            transport = ''
+            savings = ''
+            others = ''
+
+            if len(info) == 1: #monthly budget was set before
+                #convert float into two digits string
+                income = two_digits(info[0].income)
+                logging.debug(info[0].income)
+                food = two_digits(info[0].food)
+                entertainment = two_digits(info[0].entertainment)
+                accommodation = two_digits(info[0].accommodation)
+                transport = two_digits(info[0].transport)
+                savings = two_digits(info[0].savings)
+                others = two_digits(info[0].others)
+            
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
+                'income': income,
+                'food': food,
+                'entertainment': entertainment,
+                'accommodation': accommodation,
+                'transport': transport,
+                'savings': savings,
+                'others': others
             }
             template = jinja_environment.get_template('monthlybudget.html')
             self.response.out.write(template.render(template_values))
@@ -140,9 +172,36 @@ class YearlyBudgetPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user: #signed in already
+            info = Budgets.query(Budgets.user == user, Budgets.period == 'Yearly').fetch()
+            #initialize value to empty string
+            income = ''
+            food = ''
+            entertainment = ''
+            accommodation = ''
+            transport = ''
+            savings = ''
+            others = ''
+
+            if len(info) == 1: #yearly budget was set before
+                #convert float into two digits string
+                income = two_digits(info[0].income)
+                food = two_digits(info[0].food)
+                entertainment = two_digits(info[0].entertainment)
+                accommodation = two_digits(info[0].accommodation)
+                transport = two_digits(info[0].transport)
+                savings = two_digits(info[0].savings)
+                others = two_digits(info[0].others)
+            
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
+                'income': income,
+                'food': food,
+                'entertainment': entertainment,
+                'accommodation': accommodation,
+                'transport': transport,
+                'savings': savings,
+                'others': others
             }
             template = jinja_environment.get_template('yearlybudget.html')
             self.response.out.write(template.render(template_values))
@@ -153,13 +212,13 @@ class Budgets(ndb.Model):
     # Models a budget which contain every tags' amount and period(monthly or yearly)
     user = ndb.UserProperty(auto_current_user_add=True)
     period = ndb.StringProperty()
-    income = ndb.FloatProperty()
-    food = ndb.FloatProperty()
-    entertainment = ndb.FloatProperty()
-    accommodation = ndb.FloatProperty()
-    transport = ndb.FloatProperty()
-    savings = ndb.FloatProperty()
-    others = ndb.FloatProperty()
+    income = ndb.StringProperty()
+    food = ndb.StringProperty()
+    entertainment = ndb.StringProperty()
+    accommodation = ndb.StringProperty()
+    transport = ndb.StringProperty()
+    savings = ndb.StringProperty()
+    others = ndb.StringProperty()
 
 class BudgetSuccessfulPage(webapp2.RequestHandler):
     """ Handler for the budget set successful page"""
@@ -191,16 +250,21 @@ class BudgetSuccessfulPage(webapp2.RequestHandler):
                 'others': others
             }
 
-            # construct Budgets object and store into database
-            budgets = Budgets()
+            # construct or update Budgets object and store into database
+            old_budgets = Budgets.query(Budgets.user == user, Budgets.period == period).fetch()
+            if len(old_budgets) == 1:
+                budgets = old_budgets[0]
+            else:
+                budgets = Budgets()
+                
             budgets.period = period
-            budgets.income = float(income)
-            budgets.food = float(food)
-            budgets.entertainment = float(entertainment)
-            budgets.accommodation = float(accommodation)
-            budgets.transport = float(transport)
-            budgets.savings = float(savings)
-            budgets.others = float(others)
+            budgets.income = income
+            budgets.food = food
+            budgets.entertainment = entertainment
+            budgets.accommodation = accommodation
+            budgets.transport = transport
+            budgets.savings = savings
+            budgets.others = others
             budgets.put()
             
             template = jinja_environment.get_template('budgetsuccessful.html')

@@ -215,7 +215,6 @@ class MonthlyBudgetPage(webapp2.RequestHandler):
             entertainment = ''
             accommodation = ''
             transport = ''
-            savings = ''
             others = ''
 
             if len(info) == 1: #monthly budget was set before
@@ -224,7 +223,6 @@ class MonthlyBudgetPage(webapp2.RequestHandler):
                 entertainment = two_digits(info[0].entertainment)
                 accommodation = two_digits(info[0].accommodation)
                 transport = two_digits(info[0].transport)
-                savings = two_digits(info[0].savings)
                 others = two_digits(info[0].others)
             
             template_values = {
@@ -234,7 +232,6 @@ class MonthlyBudgetPage(webapp2.RequestHandler):
                 'entertainment': entertainment,
                 'accommodation': accommodation,
                 'transport': transport,
-                'savings': savings,
                 'others': others
             }
             template = jinja_environment.get_template('monthlybudget.html')
@@ -254,7 +251,6 @@ class YearlyBudgetPage(webapp2.RequestHandler):
             entertainment = ''
             accommodation = ''
             transport = ''
-            savings = ''
             others = ''
 
             if len(info) == 1: #yearly budget was set before
@@ -263,7 +259,6 @@ class YearlyBudgetPage(webapp2.RequestHandler):
                 entertainment = two_digits(info[0].entertainment)
                 accommodation = two_digits(info[0].accommodation)
                 transport = two_digits(info[0].transport)
-                savings = two_digits(info[0].savings)
                 others = two_digits(info[0].others)
             
             template_values = {
@@ -273,7 +268,6 @@ class YearlyBudgetPage(webapp2.RequestHandler):
                 'entertainment': entertainment,
                 'accommodation': accommodation,
                 'transport': transport,
-                'savings': savings,
                 'others': others
             }
             template = jinja_environment.get_template('yearlybudget.html')

@@ -382,7 +382,7 @@ class SummaryPage(webapp2.RequestHandler):
             total_accommodation_budget = "0.00"
             total_transport_budget = "0.00"
             total_others_budget = "0.00"
-            logging.debug("%d" % len(budgets))
+
             if len(user_summary) == 1: # user summary exists
                 total_income = user_summary[0].total_income
                 total_savings = user_summary[0].total_savings
@@ -429,9 +429,27 @@ class TransactionHistoryPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user: #signed in already
+            history = Transaction.query(Transaction.user == user).fetch()
+
+            # initialize the variable in transaction history and retrieve if exists
+            date = 'none'
+            tag = 'none'
+            description = 'none'
+            amount = 'none'
+            logging.debug("%d" % len(history))
+            if len(history) == 1: # transaction record exists
+                date = history[0].date
+                tag = history[0].tag
+                description = history[0].description
+                amount = history[0].amount
+                
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
+                'date': date,
+                'tag': tag,
+                'desc': description,
+                'amount': amount,
             }
             template = jinja_environment.get_template('transactionhistory.html')
             self.response.out.write(template.render(template_values))

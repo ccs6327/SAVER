@@ -34,6 +34,8 @@ def two_digits(amount):
 class UserSummary(ndb.Model):
     # Models a summary of user's total expenses, budgets, incomes, savings etc
     user = ndb.UserProperty(auto_current_user_add=True)
+    month = ndb.IntegerProperty()
+    year = ndb.IntegerProperty()
     total_income = ndb.StringProperty()
     total_savings = ndb.StringProperty()
     total_budget = ndb.StringProperty()
@@ -47,6 +49,8 @@ class UserSummary(ndb.Model):
     budget_available = ndb.StringProperty()
 
     def initialization(self): #initialize all variable to "0.00"
+        self.month = datetime.datetime.now().month
+        self.year = datetime.datetime.now().year
         self.total_income = "0.00"
         self.total_savings = "0.00"
         self.total_budget = "0.00"
@@ -162,7 +166,7 @@ class TransactionSuccessfulPage(webapp2.RequestHandler):
             transaction.put()
 
             # construct or update UserSummary object and store into database
-            user_summary = UserSummary.query(UserSummary.user == user).fetch()
+            user_summary = UserSummary.query(UserSummary.user == user, UserSummary.year == datetime.datetime.now().year, UserSummary.month == datetime.datetime.now().month).fetch()
             if len(user_summary) == 1:
                 summary = user_summary[0]
             else:
@@ -278,6 +282,8 @@ class YearlyBudgetPage(webapp2.RequestHandler):
 class Budgets(ndb.Model):
     # Models a budget which contain every tags' amount and period(monthly or yearly)
     user = ndb.UserProperty(auto_current_user_add=True)
+    month = ndb.IntegerProperty()
+    year = ndb.IntegerProperty()
     period = ndb.StringProperty()
     food = ndb.StringProperty()
     entertainment = ndb.StringProperty()
@@ -312,12 +318,18 @@ class BudgetSuccessfulPage(webapp2.RequestHandler):
             }
 
             # construct or update Budgets object and store into database
-            old_budgets = Budgets.query(Budgets.user == user, Budgets.period == period).fetch()
+            if period == 'Monthly': #check if budget of current year and month exists
+                old_budgets = Budgets.query(Budgets.user == user, Budgets.period == period, Budgets.month == datetime.datetime.now().month, Budgets.year == datetime.datetime.now().year).fetch()    
+            elif period == 'Yearly': #check if budget of current year exists
+                old_budgets = Budgets.query(Budgets.user == user, Budgets.period == period, Budgets.year == datetime.datetime.now().year).fetch()
+                
             if len(old_budgets) == 1:
                 budgets = old_budgets[0]
             else:
                 budgets = Budgets()
-                
+
+            budgets.month = datetime.datetime.now().month
+            budgets.year = datetime.datetime.now().year
             budgets.period = period
             budgets.food = food
             budgets.entertainment = entertainment
@@ -364,8 +376,8 @@ class SummaryPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user: #signed in already
-            user_summary = UserSummary.query(UserSummary.user == user).fetch()
-            budgets = Budgets.query(Budgets.user == user, Budgets.period == "Monthly").fetch()
+            user_summary = UserSummary.query(UserSummary.user == user, UserSummary.month == datetime.datetime.now().month, UserSummary.year == datetime.datetime.now().year).fetch()
+            budgets = Budgets.query(Budgets.user == user, Budgets.period == "Monthly", Budgets.month == datetime.datetime.now().month).fetch()
 
             # initialize the variable in summary and retrieve if exists
             total_income = "0.00"
@@ -403,6 +415,7 @@ class SummaryPage(webapp2.RequestHandler):
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
+                'month': datetime.datetime.now().strftime('%B'),
                 'total_income': total_income,
                 'total_savings': total_savings,
                 'total_budget': total_budget,

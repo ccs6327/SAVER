@@ -449,7 +449,6 @@ class TransactionHistoryPage(webapp2.RequestHandler):
             tag = 'none'
             description = 'none'
             amount = 'none'
-            logging.debug("%d" % len(history))
             if len(history) == 1: # transaction record exists
                 date = history[0].date
                 tag = history[0].tag
@@ -475,9 +474,34 @@ class ChartViewPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user: #signed in already
+            user_summary = UserSummary.query(UserSummary.user == user, UserSummary.month == datetime.datetime.now().month, UserSummary.year == datetime.datetime.now().year).fetch()
+
+            # initialize the variable in summary and retrieve if exists
+            total_savings = "0.00"
+            total_food_expenses = "0.00"
+            total_entertainment_expenses = "0.00"
+            total_accommodation_expenses = "0.00"
+            total_transport_expenses = "0.00"
+            total_others_expenses = "0.00"
+
+            if len(user_summary) == 1: # user summary exists
+                total_savings = user_summary[0].total_savings
+                total_food_expenses = user_summary[0].total_food_expenses
+                total_entertainment_expenses = user_summary[0].total_entertainment_expenses
+                total_accommodation_expenses = user_summary[0].total_accommodation_expenses
+                total_transport_expenses = user_summary[0].total_transport_expenses
+                total_others_expenses = user_summary[0].total_others_expenses
+            
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
+                'month': datetime.datetime.now().strftime('%B'),
+                'total_savings': total_savings,
+                'total_food_expenses': total_food_expenses,
+                'total_entertainment_expenses': total_entertainment_expenses,
+                'total_accommodation_expenses': total_accommodation_expenses,
+                'total_transport_expenses': total_transport_expenses,
+                'total_others_expenses': total_others_expenses,
             }
             template = jinja_environment.get_template('chartview.html')
             self.response.out.write(template.render(template_values))

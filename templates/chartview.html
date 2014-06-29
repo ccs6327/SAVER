@@ -9,16 +9,16 @@
 			function drawChart() {
 				var data = google.visualization.arrayToDataTable([
 				['Expenditure', '$'],
-				['Food', 400],
-				['Entertainment', 600],
-				['Accommodation', 500],
-				['Transport', 150],
-				['Savings', 650],
-				['Others', 150]
+				['Food', parseFloat(document.getElementById("total_food_expenses").value)],
+				['Entertainment', parseFloat(document.getElementById("total_entertainment_expenses").value)],
+				['Accommodation', parseFloat(document.getElementById("total_accommodation_expenses").value)],
+				['Transport', parseFloat(document.getElementById("total_transport_expenses").value)],
+				['Others', parseFloat(document.getElementById("total_others_expenses").value)],
+				['Savings', parseFloat(document.getElementById("total_savings").value)],
 				]);
 
 				var options = {
-					title: 'Expenditure Chart'
+					title: 'Expenditure Chart({{month}})'
 				};
 
 				var chart = new google.visualization.PieChart(document.getElementById('piechart'));
@@ -52,5 +52,11 @@
 			</table>
 			</div>
 		</center>
+		<input type="hidden" id="total_food_expenses" value="{{total_food_expenses}}">
+		<input type="hidden" id="total_entertainment_expenses" value="{{total_entertainment_expenses}}">
+		<input type="hidden" id="total_accommodation_expenses" value="{{total_accommodation_expenses}}">
+		<input type="hidden" id="total_transport_expenses" value="{{total_transport_expenses}}">
+		<input type="hidden" id="total_others_expenses" value="{{total_others_expenses}}">
+		<input type="hidden" id="total_savings" value="{{total_savings}}">
 	</body>
 </html>

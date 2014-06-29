@@ -21,3 +21,15 @@ indexes:
   properties:
   - name: date
     direction: desc
+
+- kind: Transaction
+  properties:
+  - name: user
+  - name: date
+    direction: desc
+
+- kind: Transaction
+  properties:
+  - name: user
+  - name: time
+    direction: desc

@@ -127,7 +127,8 @@ class Transaction(ndb.Model):
     tag = ndb.StringProperty()
     amount = ndb.StringProperty()
     date = ndb.DateProperty()
-
+    time = ndb.TimeProperty(auto_now_add=True)
+    
 class TransactionSuccessfulPage(webapp2.RequestHandler):
     """ Handler for the transaction added successful page"""
 
@@ -442,14 +443,14 @@ class TransactionHistoryPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user: #signed in already
-            history = Transaction.query(Transaction.user == user).fetch()
+            history = Transaction.query(Transaction.user == user).order(-Transaction.time).fetch()
 
             # initialize the variable in transaction history and retrieve if exists
             date = 'none'
             tag = 'none'
             description = 'none'
             amount = 'none'
-            if len(history) == 1: # transaction record exists
+            if len(history) > 0: # transaction record exists
                 date = history[0].date
                 tag = history[0].tag
                 description = history[0].description

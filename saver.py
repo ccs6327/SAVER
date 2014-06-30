@@ -450,16 +450,22 @@ class TransactionHistoryPage(webapp2.RequestHandler):
             tag = 'none'
             description = 'none'
             amount = 'none'
+            time = ''
+            showTime = ''
             if len(history) > 0: # transaction record exists
                 date = history[0].date
+                time = history[0].time
                 tag = history[0].tag
                 description = history[0].description
                 amount = history[0].amount
-                
+                temp = str(time).split(".")
+                showTime = str(temp[0])
+
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
                 'date': date,
+                'time': showTime,
                 'tag': tag,
                 'desc': description,
                 'amount': amount,

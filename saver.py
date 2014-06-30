@@ -70,6 +70,24 @@ class UserPage(webapp2.RequestHandler):
         user = users.get_current_user()
         if user:  # signed in already
             summary = UserSummary.query(UserSummary.user == user).fetch()
+            history = Transaction.query(Transaction.user == user).order(-Transaction.time).fetch()
+
+            # initialize the variable in transaction history and retrieve if exists
+            date = 'none'
+            tag = 'none'
+            description = 'none'
+            amount = 'none'
+            time = ''
+            showTime = ''
+            if len(history) > 0: # transaction record exists
+                date = history[0].date
+                time = history[0].time
+                tag = history[0].tag
+                description = history[0].description
+                amount = history[0].amount
+                temp = str(time).split(".")
+                showTime = str(temp[0])
+
 
             # initialize value of total_expenses and budget_available and retrieve if exists
             total_expenses = '0.00'
@@ -83,7 +101,12 @@ class UserPage(webapp2.RequestHandler):
                 'logout': users.create_logout_url(self.request.host_url),
                 'month': datetime.datetime.now().strftime('%B'),
                 'total_expenses': total_expenses,
-                'budget_available': budget_available
+                'budget_available': budget_available,
+                'date': date,
+                'time': showTime,
+                'tag': tag,
+                'desc': description,
+                'amount': amount,
             }
             template = jinja_environment.get_template('userhomepage.html')
             self.response.out.write(template.render(template_values))
@@ -443,32 +466,10 @@ class TransactionHistoryPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user: #signed in already
-            history = Transaction.query(Transaction.user == user).order(-Transaction.time).fetch()
-
-            # initialize the variable in transaction history and retrieve if exists
-            date = 'none'
-            tag = 'none'
-            description = 'none'
-            amount = 'none'
-            time = ''
-            showTime = ''
-            if len(history) > 0: # transaction record exists
-                date = history[0].date
-                time = history[0].time
-                tag = history[0].tag
-                description = history[0].description
-                amount = history[0].amount
-                temp = str(time).split(".")
-                showTime = str(temp[0])
 
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
-                'date': date,
-                'time': showTime,
-                'tag': tag,
-                'desc': description,
-                'amount': amount,
             }
             template = jinja_environment.get_template('transactionhistory.html')
             self.response.out.write(template.render(template_values))

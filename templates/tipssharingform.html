@@ -31,17 +31,17 @@
 						</center>
 						</br>
 						</br>
-						<label>Title:</label>
-						<input type="text" name="Title" class="span8" placeholder="Type your title here">
-						</br>
-						</br>
-						<textarea name="Content" id="textarea" class="form-control span8" placeholder="Type your content here (text limit: 500 characters)" maxlength="500"></textarea>
-						<div id="textarea_feedback"></div>
-						</br>
-						</br>
-						<div class="tipssharing">
-							<a href="/sharingformsuccessful" class="btn btn-primary">Submit</a>	
-						</div>
+						<form action="/sharingformsuccessful" class="form-inline" method="post">
+							<label>Title:</label>
+							<input type="text" name="Title" class="span8" placeholder="Type your title here" required>
+							</br>
+							</br>
+							<textarea name="Content" id="textarea" class="form-control span8" placeholder="Type your content here (text limit: 500 characters)" maxlength="500" required></textarea>
+							<div id="textarea_feedback"></div>
+							</br>
+							</br>
+							<input type="submit" name="tips" value="Submit" class="btn btn-primary btn-block">
+						</form>
 					</div>
 				</td>
 			</table>

@@ -43,6 +43,18 @@ li.menu{
 	background-color: #EAEAEA;
 }
 
+#tips_title{
+	background-color: #9DC3E6;
+	padding-top: 10px;
+	padding-bottom: 0px;
+}
+
+#tips_content{
+	background-color: #BDD7EE;
+	padding-top: 10px;
+	padding-bottom: 0px;
+}
+
 .tipssharing{
 	float: right;
 }

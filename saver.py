@@ -541,7 +541,7 @@ class WeeklyBestSaverPage(webapp2.RequestHandler):
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
             }
-            template = jinja_environment.get_template('weeklybestsaver.html')
+            template = jinja_environment.get_template('weeklyBestSaver.html')
             self.response.out.write(template.render(template_values))
         else:
             self.redirect(self.request.host_url)
@@ -556,7 +556,7 @@ class YearlyBestSaverPage(webapp2.RequestHandler):
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
             }
-            template = jinja_environment.get_template('yearlybestsaver.html')
+            template = jinja_environment.get_template('yearlyBestSaver.html')
             self.response.out.write(template.render(template_values))
         else:
             self.redirect(self.request.host_url)
@@ -575,6 +575,13 @@ class AboutPage(webapp2.RequestHandler):
             self.response.out.write(template.render(template_values))
         else:
             self.redirect(self.request.host_url)
+
+class Tips(ndb.Model):
+    # Models a tips with title, content and date.
+    user = ndb.UserProperty(auto_current_user_add=True)
+    title = ndb.StringProperty()
+    content = ndb.StringProperty()
+    datetime = ndb.DateTimeProperty(auto_now_add=True)
 
 class TipsSharingFormPage(webapp2.RequestHandler):
     """ Handler for the tips sharing form page"""
@@ -609,9 +616,14 @@ class TipsSharingPage(webapp2.RequestHandler):
 class SharingSuccessfulPage(webapp2.RequestHandler):
     """ Handler for the tips sharing page"""
 
-    def get(self):
+    def post(self):
         user = users.get_current_user()
         if user: #signed in already
+            tips = Tips()
+            tips.title = self.request.get('Title')
+            tips.content = self.request.get('Content')
+            tips.put()
+            
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
@@ -627,9 +639,20 @@ class SharingPostPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user: #signed in already
+
+            tips = Tips.query(Tips.user == user).order(Tips.datetime).fetch()
+            if len(tips) >= 1:
+                latest_index = len(tips) - 1;
+                title = tips[latest_index].title
+                content = tips[latest_index].content
+            else:
+                self.redirect('/user')
+            
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
+                'title': title,
+                'content': content
             }
             template = jinja_environment.get_template('tipssharingpost.html')
             self.response.out.write(template.render(template_values))

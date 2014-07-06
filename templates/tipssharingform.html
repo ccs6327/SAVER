@@ -3,6 +3,7 @@
 		<title> $AVER - user</title>
 		<link href="../bootstrap/css/bootstrap.css" rel="stylesheet">
 		<link type="text/css" rel="stylesheet" href="../stylesheets/main.css">
+		<script src="http://code.jquery.com/jquery-1.5.js"></script>
 	</head>
 	<body>
 		<center>
@@ -31,10 +32,11 @@
 						</br>
 						</br>
 						<label>Title:</label>
-						<input type="text" name="Title" class="span4" placeholder="Type your title here">
+						<input type="text" name="Title" class="span8" placeholder="Type your title here">
 						</br>
 						</br>
-						<input type="text" name="Content" class="span7" placeholder="Type your content here">
+						<textarea name="Content" id="textarea" class="form-control span8" placeholder="Type your content here (text limit: 500 characters)" maxlength="500"></textarea>
+						<div id="textarea_feedback"></div>
 						</br>
 						</br>
 						<div class="tipssharing">
@@ -44,6 +46,19 @@
 				</td>
 			</table>
 			</div>
+			<script>
+			$(document).ready(function() {
+				var text_max = 500;
+				$('#textarea_feedback').html(text_max + ' characters remaining');
+
+				$('#textarea').keyup(function() {
+					var text_length = $('#textarea').val().length;
+					var text_remaining = text_max - text_length;
+
+					$('#textarea_feedback').html(text_remaining + ' characters remaining');
+				});
+			});
+			</script>
 		</center>
 	</body>
 	</html>

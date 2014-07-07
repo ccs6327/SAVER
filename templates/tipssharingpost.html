@@ -1,8 +1,9 @@
-	<html>
+<html>
 	<head>
 		<title> $AVER - user</title>
 		<link href="../bootstrap/css/bootstrap.css" rel="stylesheet">
 		<link type="text/css" rel="stylesheet" href="../stylesheets/main.css">
+		<link rel="shortcut icon" href="../images/logo.ico">
 	</head>
 	<body>
 		<center>
@@ -32,13 +33,12 @@
 					</br>
 					<div>
 						<div class="well span7" id="tips_title">
-							<p>{{title}}</p>
-						</div>
+							<p><b>{{title}}</b></p>
+						</div>							
 						<div align="right">
-							<span>Posted by <img src=#> on</span>
-						</div>								
+							<span>Posted by {{user}}</span>
+						</div>	
 					</div>
-					</br>
 					</br>
 					<div class="well span7" id="tips_content">
 						<p>{{content}}</p>
@@ -53,4 +53,4 @@
 			</div>
 		</center>
 	</body>
-	</html>
+</html>

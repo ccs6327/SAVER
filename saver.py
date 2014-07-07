@@ -649,6 +649,7 @@ class SharingPostPage(webapp2.RequestHandler):
                 self.redirect('/user')
             
             template_values = {
+                'user': users.get_current_user().nickname(),
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
                 'title': title,

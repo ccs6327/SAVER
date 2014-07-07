@@ -1,6 +1,8 @@
+<!DOCTYPE HTML>
 <html>
 	<head>
 		<title> $AVER - Summary</title>
+		<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
 		<link href="../bootstrap/css/bootstrap.css" rel="stylesheet">
 		<link type="text/css" rel="stylesheet" href="../stylesheets/main.css">
 		<link rel="shortcut icon" href="../images/logo.ico">
@@ -43,6 +45,16 @@
 									<td>{{amount}}</td>
 								</tr>
 							</table>
+							<center>
+								<form action="/transuccessful" method="post">
+									<button type="submit" name="navigation" class="btn btn-info" value="left">
+										<i class="glyphicon glyphicon-chevron-left"></i>
+									</button>
+									<button type="submit" name="navigation" class="btn btn-info" value="right">
+										<i class="glyphicon glyphicon-chevron-right"></i>
+									</button>
+								</form>
+							</center>
 						</div>
 					</td>
 				</tr>

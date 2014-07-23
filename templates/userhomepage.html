@@ -4,6 +4,7 @@
 		<link href="../bootstrap/css/bootstrap.css" rel="stylesheet">
 		<link type="text/css" rel="stylesheet" href="../stylesheets/main.css">
 		<link rel="shortcut icon" href="../images/logo.ico">
+		<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
 	</head>
 	<body>
 		<center>
@@ -37,21 +38,31 @@
 							<p>Total Expenses($): {{total_expenses}}</p>
 							<p>Budget Available($): {{budget_available}}</p>
 							</br>
-							<p><u>Latest Transaction</u></p>
+							<p><u>Last Added Transaction</u></p>
 							</br>
 							<table class="table table-bordered">
 								<tr>
-									<th>Date/Time</th>
+									<th>Date</th>
 									<th>Description</th>
 									<th>Tag</th>
 									<th>Amount</th>
+									<th></th>
 								</tr>
+								{% if transactions %}
 								<tr>
-									<td>{{date}} {{time}}</td>
+									<td>{{date}}</td>
 									<td>{{desc}}</td>
 									<td>{{tag}}</td>
 									<td>{{amount}}</td>
+									<td>
+										<form action="/deletetransaction" method="post">
+											<button type="submit" class="btn btn-danger">
+												<i class="glyphicon glyphicon-trash"></i>
+											</button>
+										</form>
+									</td>
 								</tr>
+								{% endif %}
 							</table>
 						</div>
 					</td>

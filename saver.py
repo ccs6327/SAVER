@@ -10,6 +10,7 @@ from google.appengine.ext import ndb
 jinja_environment = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__) + "/templates"))
 
+#global function
 def two_digits(amount):
     #turn amount input into two digits amount
 
@@ -30,6 +31,8 @@ def two_digits(amount):
             return dollar_cent[0] + "." + "00"
         else:
             return amount
+
+#Datastore Definition
 
 class UserSummary(ndb.Model):
     # Models a summary of user's total expenses, budgets, incomes, savings etc
@@ -63,6 +66,36 @@ class UserSummary(ndb.Model):
         self.total_others_expenses = "0.00"
         self.budget_available = "0.00"
 
+class Transaction(ndb.Model):
+    # Models a transaction with description, tag, amount, date.
+    user = ndb.UserProperty(auto_current_user_add=True)
+    description = ndb.StringProperty()
+    tag = ndb.StringProperty()
+    amount = ndb.StringProperty()
+    date = ndb.DateProperty()
+    added_time = ndb.DateTimeProperty(auto_now_add=True)
+    
+
+class Budgets(ndb.Model):
+    # Models a budget which contain every tags' amount and period(monthly or yearly)
+    user = ndb.UserProperty(auto_current_user_add=True)
+    month = ndb.IntegerProperty()
+    year = ndb.IntegerProperty()
+    period = ndb.StringProperty()
+    food = ndb.StringProperty()
+    entertainment = ndb.StringProperty()
+    accommodation = ndb.StringProperty()
+    transport = ndb.StringProperty()
+    others = ndb.StringProperty()
+    
+class Tips(ndb.Model):
+    # Models a tips with title, content and date.
+    user = ndb.UserProperty(auto_current_user_add=True)
+    title = ndb.StringProperty()
+    content = ndb.StringProperty()
+    datetime = ndb.DateTimeProperty(auto_now_add=True)
+
+#Handler
 class UserPage(webapp2.RequestHandler):
     """ Handler for the front page after user login."""
 
@@ -70,7 +103,7 @@ class UserPage(webapp2.RequestHandler):
         user = users.get_current_user()
         if user:  # signed in already
             summary = UserSummary.query(UserSummary.user == user).fetch()
-            history = Transaction.query(Transaction.user == user).order(-Transaction.time).fetch()
+            history = Transaction.query(Transaction.user == user).order(-Transaction.added_time).fetch()
 
             # initialize the variable in transaction history and retrieve if exists
             date = 'none'
@@ -81,7 +114,6 @@ class UserPage(webapp2.RequestHandler):
             showTime = ''
             if len(history) > 0: # transaction record exists
                 date = history[0].date
-                time = history[0].time
                 tag = history[0].tag
                 description = history[0].description
                 amount = history[0].amount
@@ -107,6 +139,7 @@ class UserPage(webapp2.RequestHandler):
                 'tag': tag,
                 'desc': description,
                 'amount': amount,
+                'transactions': history
             }
             template = jinja_environment.get_template('userhomepage.html')
             self.response.out.write(template.render(template_values))
@@ -128,6 +161,57 @@ class ManagePage(webapp2.RequestHandler):
         else:
             self.redirect(self.request.host_url)
 
+class DeleteTransaction(webapp2.RequestHandler):
+    """ Handler to delete transaction history"""
+
+    def post(self):
+        user = users.get_current_user()
+        transactions = Transaction.query(Transaction.user == user).order(-Transaction.added_time).fetch()
+        transaction_to_be_deleted = transactions[0]
+
+        tag = transaction_to_be_deleted.tag
+        amount = transaction_to_be_deleted.amount
+    
+        template_values = {
+            'description': transaction_to_be_deleted.description,
+            'tag': tag,
+            'amount': amount,
+            'date': transaction_to_be_deleted.date
+        }
+        transaction_to_be_deleted.key.delete()
+
+        #retrieve UserSummary object and update it after deletion
+        summary = UserSummary.query(UserSummary.user == user, UserSummary.year == datetime.datetime.now().year, UserSummary.month == datetime.datetime.now().month).fetch()[0]
+
+        # update total tag amount
+        if tag == 'food':
+            summary.total_food_expenses = two_digits(str(float(summary.total_food_expenses) - float(amount)))
+        elif tag == 'entertainment':
+            summary.total_entertainment_expenses = two_digits(str(float(summary.total_entertainment_expenses) - float(amount)))
+        elif tag == 'accommodation':
+            summary.total_accommodation_expenses = two_digits(str(float(summary.total_accommodation_expenses) - float(amount)))
+        elif tag == 'transport':
+            summary.total_transport_expenses = two_digits(str(float(summary.total_transport_expenses) - float(amount)))
+        elif tag == 'savings':
+            summary.total_savings = two_digits(str(float(summary.total_savings) - float(amount)))
+        elif tag == 'others':
+            summary.total_others_expenses = two_digits(str(float(summary.total_others_expenses) - float(amount)))
+        elif tag == 'income':
+            summary.total_income = two_digits(str(float(summary.total_income) - float(amount)))
+
+        # update total_expenses
+        if tag != 'income' and tag != 'savings':
+            summary.total_expenses = two_digits(str(float(summary.total_expenses) - float(amount)))
+
+        # update available budget_available
+        if tag != 'income':
+            summary.budget_available = two_digits(str(float(summary.budget_available) + float(amount)))
+
+        summary.put()
+        
+        template = jinja_environment.get_template('transactiondeletedsuccessful.html')
+        self.response.out.write(template.render(template_values))
+
 class TransactionPage(webapp2.RequestHandler):
     """ Handler for the add new transaction page"""
 
@@ -142,15 +226,6 @@ class TransactionPage(webapp2.RequestHandler):
             self.response.out.write(template.render(template_values))
         else:
             self.redirect(self.request.host_url)
-
-class Transaction(ndb.Model):
-    # Models a transaction with description, tag, amount, date.
-    user = ndb.UserProperty(auto_current_user_add=True)
-    description = ndb.StringProperty()
-    tag = ndb.StringProperty()
-    amount = ndb.StringProperty()
-    date = ndb.DateProperty()
-    time = ndb.TimeProperty(auto_now_add=True)
     
 class TransactionSuccessfulPage(webapp2.RequestHandler):
     """ Handler for the transaction added successful page"""
@@ -302,18 +377,6 @@ class YearlyBudgetPage(webapp2.RequestHandler):
             self.response.out.write(template.render(template_values))
         else:
             self.redirect(self.request.host_url)
-
-class Budgets(ndb.Model):
-    # Models a budget which contain every tags' amount and period(monthly or yearly)
-    user = ndb.UserProperty(auto_current_user_add=True)
-    month = ndb.IntegerProperty()
-    year = ndb.IntegerProperty()
-    period = ndb.StringProperty()
-    food = ndb.StringProperty()
-    entertainment = ndb.StringProperty()
-    accommodation = ndb.StringProperty()
-    transport = ndb.StringProperty()
-    others = ndb.StringProperty()
 
 class BudgetSuccessfulPage(webapp2.RequestHandler):
     """ Handler for the budget set successful page"""
@@ -576,13 +639,6 @@ class AboutPage(webapp2.RequestHandler):
         else:
             self.redirect(self.request.host_url)
 
-class Tips(ndb.Model):
-    # Models a tips with title, content and date.
-    user = ndb.UserProperty(auto_current_user_add=True)
-    title = ndb.StringProperty()
-    content = ndb.StringProperty()
-    datetime = ndb.DateTimeProperty(auto_now_add=True)
-
 class TipsSharingFormPage(webapp2.RequestHandler):
     """ Handler for the tips sharing form page"""
 
@@ -679,5 +735,6 @@ app = webapp2.WSGIApplication([('/user', UserPage),
                                ('/tipssharingform', TipsSharingFormPage),
                                ('/tipssharing', TipsSharingPage),
                                ('/sharingformsuccessful', SharingSuccessfulPage),
-                               ('/sharingpost', SharingPostPage)],
+                               ('/sharingpost', SharingPostPage),
+                               ('/deletetransaction', DeleteTransaction)],
                                debug=True)

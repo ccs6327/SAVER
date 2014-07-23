@@ -30,6 +30,12 @@ indexes:
 - kind: Transaction
   properties:
   - name: user
+  - name: added_time
+    direction: desc
+
+- kind: Transaction
+  properties:
+  - name: user
   - name: date
     direction: desc
 

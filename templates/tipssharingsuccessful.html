@@ -32,7 +32,10 @@
 								<p>Your submission is successful.</p>
 								<p>You may view your post now.</p>
 							</div>
-							<a href="/sharingpost" class="btn btn-primary">Click Here!</a>
+							<form action="/sharingpost" method="post">
+								<input type="hidden" name="entity_id" value="{{tips.ID}}">
+								<button type="submit" class="btn btn-primary">Click Here!</button>
+							</form>
 						</div>
 						</center>
 					</td>

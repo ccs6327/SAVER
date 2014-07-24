@@ -31,20 +31,23 @@
 						</center>
 						</br>
 						</br>
-						<button class="btn"><img src=#> posted on</button>
-						</br>
-						</br>
-						<div class="tipssharing">
-							<button class="btn btn-primary">example1</button>
-						</div>
-						</br>
-						</br>
-						<button class="btn"><img src=#> posted on</button>
-						</br>
-						</br>
-						<div class="tipssharing">
-							<button class="btn btn-primary">example2</button>	
-						</div>
+						<table class="table table-stripped">
+							<tr>
+								<th>Title</th>
+								<th>Author</th>
+							</tr>
+							{% for tip in tips %}
+							<tr>
+								<td>
+									<form action="/sharingpost" method="post">
+										<input type="hidden" name="entity_id" value="{{tip.ID}}">
+										<button class="btn btn-block btn-info" type="submit">{{tip.title}}</button>
+									</form>
+								</td>
+								<td>{{tip.user.nickname()}}</td>
+							</tr>
+							{% endfor %}
+						</table>
 					</div>
 				</td>
 			</table>

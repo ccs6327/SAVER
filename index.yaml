@@ -24,8 +24,21 @@ indexes:
 
 - kind: Tips
   properties:
+  - name: title
   - name: user
   - name: datetime
+    direction: desc
+
+- kind: Tips
+  properties:
+  - name: user
+  - name: datetime
+
+- kind: Tips
+  properties:
+  - name: user
+  - name: datetime
+    direction: desc
 
 - kind: Transaction
   properties:

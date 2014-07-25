@@ -45,7 +45,11 @@
 					</div>
 					<center>
 					<div>
-						<a href="/tipssharing" class="btn btn-primary">Back</a>	
+						<form method="post" action="/tipssharing">
+							{{current_index}}
+							<input type="hidden" name="current_index" value="{{current_index}}">
+							<button type="submit" class="btn btn-primary">Back</button>
+						</form>
 					</div>
 					</center>
 				</div>

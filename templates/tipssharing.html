@@ -1,6 +1,7 @@
 	<html>
 	<head>
 		<title> $AVER - user</title>
+		<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
 		<link href="../bootstrap/css/bootstrap.css" rel="stylesheet">
 		<link type="text/css" rel="stylesheet" href="../stylesheets/main.css">
 		<link rel="shortcut icon" href="../images/logo.ico">
@@ -41,6 +42,7 @@
 								<td>
 									<form action="/sharingpost" method="post">
 										<input type="hidden" name="entity_id" value="{{tip.ID}}">
+										<input type="hidden" name="current_index" value="{{current_index}}">
 										<button class="btn btn-block btn-info" type="submit">{{tip.title}}</button>
 									</form>
 								</td>
@@ -48,6 +50,21 @@
 							</tr>
 							{% endfor %}
 						</table>
+						<center>
+							<form action="/tipssharing" method="post">
+								<input type="hidden" name="current_index" value="{{current_index}}">
+								{% if current_index - 5 >= 0 %}
+								<button type="submit" name="navigation" class="btn btn-info" value="left">
+									<i class="glyphicon glyphicon-chevron-left"></i>
+								</button>
+								{% endif %}
+								{% if tips_size > current_index + 5 %}
+								<button type="submit" name="navigation" class="btn btn-info" value="right">
+									<i class="glyphicon glyphicon-chevron-right"></i>
+								</button>
+								{% endif %}
+							</form>
+						</center>
 					</div>
 				</td>
 			</table>

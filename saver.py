@@ -644,16 +644,32 @@ class TipsSharingFormPage(webapp2.RequestHandler):
 class TipsSharingPage(webapp2.RequestHandler):
     """ Handler for the tips sharing page"""
 
-    def get(self):
+    def post(self):
         user = users.get_current_user()
         if user: #signed in already
 
             tips = Tips.query().order(-Tips.datetime).fetch()
-            
+
+            current_index = int(self.request.get('current_index'))
+
+            if self.request.get('navigation') == 'left' and current_index - 5 >= 0:
+                current_index = current_index - 5
+            elif self.request.get('navigation') == 'right' and current_index + 5 < len(tips):
+                current_index = current_index + 5
+    
+            tips_size = len(tips)
+
+            if len(tips) > current_index + 5:
+                tips = tips[current_index:current_index + 5]
+            else:
+                tips = tips[current_index:len(tips)]
+
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
-                'tips': tips
+                'tips': tips,
+                'current_index': current_index,
+                'tips_size': tips_size
             }
             template = jinja_environment.get_template('tipssharing.html')
             self.response.out.write(template.render(template_values))
@@ -697,6 +713,7 @@ class SharingPostPage(webapp2.RequestHandler):
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
                 'tips': tips,
+                'current_index': self.request.get('current_index')
             }
             template = jinja_environment.get_template('tipssharingpost.html')
             self.response.out.write(template.render(template_values))

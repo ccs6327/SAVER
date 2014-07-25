@@ -69,6 +69,7 @@ class UserSummary(ndb.Model):
 class Transaction(ndb.Model):
     # Models a transaction with description, tag, amount, date.
     user = ndb.UserProperty(auto_current_user_add=True)
+    ID = ndb.IntegerProperty()
     description = ndb.StringProperty()
     tag = ndb.StringProperty()
     amount = ndb.StringProperty()
@@ -106,21 +107,10 @@ class UserPage(webapp2.RequestHandler):
             summary = UserSummary.query(UserSummary.user == user).fetch()
             history = Transaction.query(Transaction.user == user).order(-Transaction.added_time).fetch()
 
+            transaction = ""
             # initialize the variable in transaction history and retrieve if exists
-            date = 'none'
-            tag = 'none'
-            description = 'none'
-            amount = 'none'
-            time = ''
-            showTime = ''
             if len(history) > 0: # transaction record exists
-                date = history[0].date
-                tag = history[0].tag
-                description = history[0].description
-                amount = history[0].amount
-                temp = str(time).split(".")
-                showTime = str(temp[0])
-
+                transaction = history[0]
 
             # initialize value of total_expenses and budget_available and retrieve if exists
             total_expenses = '0.00'
@@ -135,12 +125,7 @@ class UserPage(webapp2.RequestHandler):
                 'month': datetime.datetime.now().strftime('%B'),
                 'total_expenses': total_expenses,
                 'budget_available': budget_available,
-                'date': date,
-                'time': showTime,
-                'tag': tag,
-                'desc': description,
-                'amount': amount,
-                'transactions': history
+                'transaction': transaction
             }
             template = jinja_environment.get_template('userhomepage.html')
             self.response.out.write(template.render(template_values))
@@ -167,22 +152,21 @@ class DeleteTransaction(webapp2.RequestHandler):
 
     def post(self):
         user = users.get_current_user()
-        transactions = Transaction.query(Transaction.user == user).order(-Transaction.added_time).fetch()
-        transaction_to_be_deleted = transactions[0]
-
-        tag = transaction_to_be_deleted.tag
-        amount = transaction_to_be_deleted.amount
+        transaction_to_be_deleted = Transaction.get_by_id(int(self.request.get('entity_id')))
     
         template_values = {
-            'description': transaction_to_be_deleted.description,
-            'tag': tag,
-            'amount': amount,
-            'date': transaction_to_be_deleted.date
+            'user_mail': users.get_current_user().email(),
+            'logout': users.create_logout_url(self.request.host_url),
+            'transaction': transaction_to_be_deleted
         }
         transaction_to_be_deleted.key.delete()
 
         #retrieve UserSummary object and update it after deletion
         summary = UserSummary.query(UserSummary.user == user, UserSummary.year == datetime.datetime.now().year, UserSummary.month == datetime.datetime.now().month).fetch()[0]
+
+        # set the variable tag and amount
+        tag = transaction_to_be_deleted.tag
+        amount = transaction_to_be_deleted.amount
 
         # update total tag amount
         if tag == 'food':
@@ -263,6 +247,8 @@ class TransactionSuccessfulPage(webapp2.RequestHandler):
             transaction.tag = tag
             transaction.amount = amount
             transaction.date = date
+            transaction.put()
+            transaction.ID = int(transaction.key.id())
             transaction.put()
 
             # construct or update UserSummary object and store into database

@@ -49,14 +49,15 @@
 									<th>Amount</th>
 									<th></th>
 								</tr>
-								{% if transactions %}
+								{% if transaction %}
 								<tr>
-									<td>{{date}}</td>
-									<td>{{desc}}</td>
-									<td>{{tag}}</td>
-									<td>{{amount}}</td>
+									<td>{{transaction.date}}</td>
+									<td>{{transaction.description}}</td>
+									<td>{{transaction.tag}}</td>
+									<td>{{transaction.amount}}</td>
 									<td>
 										<form action="/deletetransaction" method="post">
+											<input type="hidden" name="entity_id" value="{{transaction.ID}}">
 											<button type="submit" class="btn btn-danger">
 												<i class="glyphicon glyphicon-trash"></i>
 											</button>

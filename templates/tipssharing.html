@@ -22,6 +22,7 @@
 						<li><a href="/manage">Manage</a></li>
 						<li><a href="/overview">Overview</a></li>
 						<li><a href="/leaderboard">Leaderboard</a></li>
+						<li class="active"><a href="/tipssharing">Tips Sharing</a></li>
 						<li><a href="/about">About</a></li>
 						</ul>
 					</td>
@@ -51,7 +52,7 @@
 							{% endfor %}
 						</table>
 						<center>
-							<form action="/tipssharing" method="post">
+							<form action="/tipssharing" method="get">
 								<input type="hidden" name="current_index" value="{{current_index}}">
 								{% if current_index - 5 >= 0 %}
 								<button type="submit" name="navigation" class="btn btn-info" value="left">
@@ -64,6 +65,8 @@
 								</button>
 								{% endif %}
 							</form>
+							</br>
+							<p align="middle"><a href="/tipssharingform" class="btn btn-primary">Write your own post here</a></p>
 						</center>
 					</div>
 				</td>

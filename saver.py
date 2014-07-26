@@ -677,13 +677,16 @@ class TipsSharingFormPage(webapp2.RequestHandler):
 class TipsSharingPage(webapp2.RequestHandler):
     """ Handler for the tips sharing page"""
 
-    def post(self):
+    def get(self):
         user = users.get_current_user()
         if user: #signed in already
 
             tips = Tips.query().order(-Tips.datetime).fetch()
 
-            current_index = int(self.request.get('current_index'))
+            if self.request.get('current_index'):
+                current_index = int(self.request.get('current_index'))
+            else:
+                current_index = 0
 
             if self.request.get('navigation') == 'left' and current_index - 5 >= 0:
                 current_index = current_index - 5

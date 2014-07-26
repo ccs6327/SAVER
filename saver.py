@@ -118,17 +118,20 @@ class UserPage(webapp2.RequestHandler):
 
             # initialize value of total_expenses and budget_available and retrieve if exists
             total_expenses = '0.00'
-            budget_available = '0.00'
+            monthly_budget_available = '0.00'
+            yearly_budget_available = '0.00'
             if len(summary) == 1: #does contain user summary
                 total_expenses = summary[0].total_expenses
-                budget_available = summary[0].budget_available
+                monthly_budget_available = summary[0].monthly_budget_available
+                yearly_budget_available = summary[0].yearly_budget_available
                 
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
                 'month': datetime.datetime.now().strftime('%B'),
                 'total_expenses': total_expenses,
-                'budget_available': budget_available,
+                'monthly_budget_available': monthly_budget_available,
+                'yearly_budget_available': yearly_budget_available,
                 'transaction': transaction
             }
             template = jinja_environment.get_template('userhomepage.html')
@@ -196,7 +199,8 @@ class DeleteTransaction(webapp2.RequestHandler):
 
         # update available budget_available
         if tag != 'income':
-            summary.budget_available = two_digits(str(float(summary.budget_available) + float(amount)))
+            summary.monthly_budget_available = two_digits(str(float(summary.monthly_budget_available) + float(amount)))
+            summary.yearly_budget_available = two_digits(str(float(summary.yearly_budget_available) + float(amount)))
 
         summary.put()
         
@@ -309,7 +313,7 @@ class MonthlyBudgetPage(webapp2.RequestHandler):
             budgets = Budgets.query(Budgets.user == user, Budgets.period == 'Monthly').fetch()
             summary = UserSummary.query(UserSummary.user == user).fetch()
             #initialize value to empty string
-            monthly_budget = {'food' : '0.00', 'entertainment' : '0.00', 'accommodation' : '0.00', 'transport' : '0.00', 'other' : '0.00'}
+            monthly_budget = {'food' : '0.00', 'entertainment' : '0.00', 'accommodation' : '0.00', 'transport' : '0.00', 'others' : '0.00'}
             
             if len(budgets) == 1: #monthly budget was set before
                 monthly_budget['food'] = budgets[0].food

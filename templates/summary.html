@@ -28,8 +28,8 @@
 					<td>
 						<div class="well span8">
 						<p><u>Summary({{month}})</u></p>
-						<p>Total Income($): {{total_income}}</p>
-						<p>Total Savings($): {{total_savings}}</p>
+						<p>Total Income($): {{summary['total_income']}}</p>
+						<p>Total Savings($): {{summary['total_savings']}}</p>
 						</br>
 						<table class="table table-bordered">
 							<tr>
@@ -39,33 +39,33 @@
 							</tr>
 							<tr>
 								<th>Total</th>
-								<td>{{total_expenses}}</td>
-								<td>{{total_monthly_budget}}</td>
+								<td>{{summary['total_expenses']}}</td>
+								<td>{{summary['total_monthly_budget']}}</td>
 							</tr>
 							<tr>
 								<th>Food</th>
-								<td>{{total_food_expenses}}</td>
-								<td>{{total_food_budget}}</td>
+								<td>{{summary['total_food_expenses']}}</td>
+								<td>{{summary['total_food_budget']}}</td>
 							</tr>
 							<tr>
 								<th>Entertainment</th>
-								<td>{{total_entertainment_expenses}}</td>
-								<td>{{total_entertainment_budget}}</td>
+								<td>{{summary['total_entertainment_expenses']}}</td>
+								<td>{{summary['total_entertainment_budget']}}</td>
 							</tr>
 							<tr>
 								<th>Accommodation</th>
-								<td>{{total_accommodation_expenses}}</td>
-								<td>{{total_accommodation_budget}}</td>
+								<td>{{summary['total_accommodation_expenses']}}</td>
+								<td>{{summary['total_accommodation_budget']}}</td>
 							</tr>
 							<tr>
 								<th>Transport</th>
-								<td>{{total_transport_expenses}}</td>
-								<td>{{total_transport_budget}}</td>
+								<td>{{summary['total_transport_expenses']}}</td>
+								<td>{{summary['total_transport_budget']}}</td>
 							</tr>
 							<tr>
 								<th>Others</th>
-								<td>{{total_others_expenses}}</td>
-								<td>{{total_others_budget}}</td>
+								<td>{{summary['total_others_expenses']}}</td>
+								<td>{{summary['total_others_budget']}}</td>
 							</tr>
 						</table>
 					</td>

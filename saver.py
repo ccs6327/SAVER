@@ -341,27 +341,19 @@ class YearlyBudgetPage(webapp2.RequestHandler):
             budgets = Budgets.query(Budgets.user == user, Budgets.period == 'Yearly').fetch()
             summary = UserSummary.query(UserSummary.user == user).fetch()
             #initialize value to empty string
-            food = '0.00'
-            entertainment = '0.00'
-            accommodation = '0.00'
-            transport = '0.00'
-            others = '0.00'
+            yearly_budget = {'food' : '0.00', 'entertainment' : '0.00', 'accommodation' : '0.00', 'transport' : '0.00', 'others' : '0.00'}
 
             if len(budgets) == 1: #yearly budget was set before
-                food = budgets[0].food
-                entertainment = budgets[0].entertainment
-                accommodation = budgets[0].accommodation
-                transport = budgets[0].transport
-                others = budgets[0].others
+                yearly_budget['food'] = budgets[0].food
+                yearly_budget['entertainment'] = budgets[0].entertainment
+                yearly_budget['accommodation'] = budgets[0].accommodation
+                yearly_budget['transport'] = budgets[0].transport
+                yearly_budget['others'] = budgets[0].others
                 
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
-                'food': food,
-                'entertainment': entertainment,
-                'accommodation': accommodation,
-                'transport': transport,
-                'others': others
+                'yearly_budget': yearly_budget
             }
             template = jinja_environment.get_template('yearlybudget.html')
             self.response.out.write(template.render(template_values))
@@ -377,22 +369,6 @@ class BudgetSuccessfulPage(webapp2.RequestHandler):
 
             #get the value from transaction form
             period = self.request.get('setbudget').split(' ')[1]
-            food = two_digits(self.request.get('food'))
-            entertainment = two_digits(self.request.get('entertainment'))
-            accommodation = two_digits(self.request.get('accommodation'))
-            transport = two_digits(self.request.get('transport'))
-            others = two_digits(self.request.get('others'))
-            
-            template_values = {
-                'user_mail': users.get_current_user().email(),
-                'logout': users.create_logout_url(self.request.host_url),
-                'period': period,
-                'food': food,
-                'entertainment': entertainment,
-                'accommodation': accommodation,
-                'transport': transport,
-                'others': others
-            }
 
             # construct or update Budgets object and store into database
             if period == 'Monthly': #check if budget of current year and month exists
@@ -408,11 +384,11 @@ class BudgetSuccessfulPage(webapp2.RequestHandler):
             budgets.month = datetime.datetime.now().month
             budgets.year = datetime.datetime.now().year
             budgets.period = period
-            budgets.food = food
-            budgets.entertainment = entertainment
-            budgets.accommodation = accommodation
-            budgets.transport = transport
-            budgets.others = others
+            budgets.food = two_digits(self.request.get('food'))
+            budgets.entertainment = two_digits(self.request.get('entertainment'))
+            budgets.accommodation = two_digits(self.request.get('accommodation'))
+            budgets.transport = two_digits(self.request.get('transport'))
+            budgets.others = two_digits(self.request.get('others'))
             budgets.put()
 
             # construct or update UserSummary object  
@@ -424,17 +400,24 @@ class BudgetSuccessfulPage(webapp2.RequestHandler):
                 summary = UserSummary()
                 summary.initialization()
             # update accordingly to the period
+            budget_sum = float(budgets.food) + float(budgets.entertainment) + float(budgets.accommodation) + float(budgets.transport) + float(budgets.others)
             if period == 'Monthly':
-                summary.total_monthly_budget = str(float(food) + float(entertainment) + float(accommodation) + float(transport) + float(others))
-                summary.monthly_budget_available = str(float(summary.total_monthly_budget) - float(summary.total_expenses))
+                summary.total_monthly_budget = two_digits(budget_sum)
+                summary.monthly_budget_available = two_digits(float(summary.total_monthly_budget) - float(summary.total_expenses))
             elif period == 'Yearly':
-                summary.total_yearly_budget = str(float(food) + float(entertainment) + float(accommodation) + float(transport) + float(others))
+                summary.total_yearly_budget = two_digits(budget_sum)
                 # count total year expenses
                 total_yearly_expenses = 0
                 for monthly_summary in user_summary:
                     total_yearly_expenses += float(monthly_summary.total_expenses)
-                summary.yearly_budget_available = str(float(summary.total_yearly_budget) - total_yearly_expenses) 
+                summary.yearly_budget_available = two_digits(float(summary.total_yearly_budget) - total_yearly_expenses) 
             summary.put()
+
+            template_values = {
+                'user_mail': users.get_current_user().email(),
+                'logout': users.create_logout_url(self.request.host_url),
+                'budgets': budgets
+            }
             
             template = jinja_environment.get_template('budgetsuccessful.html')
             self.response.out.write(template.render(template_values))
@@ -466,56 +449,43 @@ class SummaryPage(webapp2.RequestHandler):
             budgets = Budgets.query(Budgets.user == user, Budgets.period == "Monthly", Budgets.month == datetime.datetime.now().month).fetch()
 
             # initialize the variable in summary and retrieve if exists
-            total_income = "0.00"
-            total_savings = "0.00"
-            total_monthly_budget = "0.00"
-            total_expenses = "0.00"
-            total_food_expenses = "0.00"
-            total_entertainment_expenses = "0.00"
-            total_accommodation_expenses = "0.00"
-            total_transport_expenses = "0.00"
-            total_others_expenses = "0.00"
-            total_food_budget = "0.00"
-            total_entertainment_budget = "0.00"
-            total_accommodation_budget = "0.00"
-            total_transport_budget = "0.00"
-            total_others_budget = "0.00"
+            summary = {'total_income': '0.00',
+                       'total_savings': '0.00',
+                       'total_monthly_budget': '0.00',
+                       'total_expenses': '0.00',
+                       'total_food_expenses' : '0.00',
+                       'total_entertainment_expenses' : '0.00',
+                       'total_accommodation_expenses' : '0.00',
+                       'total_transport_expenses' : '0.00',
+                       'total_others_expenses' : '0.00',
+                       'total_food_budget' : '0.00',
+                       'total_entertainment_budget' : '0.00',
+                       'total_accommodation_budget' : '0.00',
+                       'total_transport_budget' : '0.00',
+                       'total_others_budget' : '0.00'}
 
             if len(user_summary) == 1: # user summary exists
-                total_income = user_summary[0].total_income
-                total_savings = user_summary[0].total_savings
-                total_monthly_budget = user_summary[0].total_monthly_budget
-                total_expenses = user_summary[0].total_expenses
-                total_food_expenses = user_summary[0].total_food_expenses
-                total_entertainment_expenses = user_summary[0].total_entertainment_expenses
-                total_accommodation_expenses = user_summary[0].total_accommodation_expenses
-                total_transport_expenses = user_summary[0].total_transport_expenses
-                total_others_expenses = user_summary[0].total_others_expenses
+                summary['total_income'] = user_summary[0].total_income
+                summary['total_savings'] = user_summary[0].total_savings
+                summary['total_monthly_budget'] = user_summary[0].total_monthly_budget
+                summary['total_expenses'] = user_summary[0].total_expenses
+                summary['total_food_expenses'] = user_summary[0].total_food_expenses
+                summary['total_entertainment_expenses'] = user_summary[0].total_entertainment_expenses
+                summary['total_accommodation_expenses'] = user_summary[0].total_accommodation_expenses
+                summary['total_transport_expenses'] = user_summary[0].total_transport_expenses
+                summary['total_others_expenses'] = user_summary[0].total_others_expenses
             if len(budgets) == 1: # budget exists
-                total_food_budget = budgets[0].food
-                total_entertainment_budget = budgets[0].entertainment
-                total_accommodation_budget = budgets[0].accommodation
-                total_transport_budget = budgets[0].transport
-                total_others_budget = budgets[0].others
+                summary['total_food_budget'] = budgets[0].food
+                summary['total_entertainment_budget'] = budgets[0].entertainment
+                summary['total_accommodation_budget'] = budgets[0].accommodation
+                summary['total_transport_budget'] = budgets[0].transport
+                summary['total_others_budget'] = budgets[0].others
             
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
                 'month': datetime.datetime.now().strftime('%B'),
-                'total_income': total_income,
-                'total_savings': total_savings,
-                'total_monthly_budget': total_monthly_budget,
-                'total_expenses': total_expenses,
-                'total_food_expenses': total_food_expenses,
-                'total_entertainment_expenses': total_entertainment_expenses,
-                'total_accommodation_expenses': total_accommodation_expenses,
-                'total_transport_expenses': total_transport_expenses,
-                'total_others_expenses': total_others_expenses,
-                'total_food_budget': total_food_budget,
-                'total_entertainment_budget': total_entertainment_budget,
-                'total_accommodation_budget': total_accommodation_budget,
-                'total_transport_budget': total_transport_budget,
-                'total_others_budget': total_others_budget
+                'summary': summary
             }
             template = jinja_environment.get_template('summary.html')
             self.response.out.write(template.render(template_values))
@@ -568,31 +538,26 @@ class ChartViewPage(webapp2.RequestHandler):
             user_summary = UserSummary.query(UserSummary.user == user, UserSummary.month == datetime.datetime.now().month, UserSummary.year == datetime.datetime.now().year).fetch()
 
             # initialize the variable in summary and retrieve if exists
-            total_savings = "0.00"
-            total_food_expenses = "0.00"
-            total_entertainment_expenses = "0.00"
-            total_accommodation_expenses = "0.00"
-            total_transport_expenses = "0.00"
-            total_others_expenses = "0.00"
+            summary = {'total_savings': '0.00',
+                       'total_food_expenses': '0.00',
+                       'total_entertainment_expenses': '0.00',
+                       'total_accommodation_expenses': '0.00',
+                       'total_transport_expenses': '0.00',
+                       'total_others_expenses': '0.00'}
 
             if len(user_summary) == 1: # user summary exists
-                total_savings = user_summary[0].total_savings
-                total_food_expenses = user_summary[0].total_food_expenses
-                total_entertainment_expenses = user_summary[0].total_entertainment_expenses
-                total_accommodation_expenses = user_summary[0].total_accommodation_expenses
-                total_transport_expenses = user_summary[0].total_transport_expenses
-                total_others_expenses = user_summary[0].total_others_expenses
+                summary['total_savings'] = user_summary[0].total_savings
+                summary['total_food_expenses'] = user_summary[0].total_food_expenses
+                summary['total_entertainment_expenses'] = user_summary[0].total_entertainment_expenses
+                summary['total_accommodation_expenses'] = user_summary[0].total_accommodation_expenses
+                summary['total_transport_expenses'] = user_summary[0].total_transport_expenses
+                summary['total_others_expenses'] = user_summary[0].total_others_expenses
             
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
                 'month': datetime.datetime.now().strftime('%B'),
-                'total_savings': total_savings,
-                'total_food_expenses': total_food_expenses,
-                'total_entertainment_expenses': total_entertainment_expenses,
-                'total_accommodation_expenses': total_accommodation_expenses,
-                'total_transport_expenses': total_transport_expenses,
-                'total_others_expenses': total_others_expenses,
+                'summary': summary
             }
             template = jinja_environment.get_template('chartview.html')
             self.response.out.write(template.render(template_values))

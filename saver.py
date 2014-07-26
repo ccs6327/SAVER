@@ -516,10 +516,31 @@ class TransactionHistoryPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user: #signed in already
+            transactions = Transaction.query().order(-Transaction.added_time).fetch()
 
+            if self.request.get('current_index'):
+                current_index = int(self.request.get('current_index'))
+            else:
+                current_index = 0
+
+            if self.request.get('navigation') == 'left' and current_index - 5 >= 0:
+                current_index = current_index - 5
+            elif self.request.get('navigation') == 'right' and current_index + 5 < len(transactions):
+                current_index = current_index + 5
+    
+            transactions_size = len(transactions)
+
+            if len(transactions) > current_index + 5:
+                transactions = transactions[current_index:current_index + 5]
+            else:
+                transactions = transactions[current_index:len(transactions)]
+                
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
+                'transactions': transactions,
+                'current_index': current_index,
+                'transactions_size': transactions_size,
             }
             template = jinja_environment.get_template('transactionhistory.html')
             self.response.out.write(template.render(template_values))

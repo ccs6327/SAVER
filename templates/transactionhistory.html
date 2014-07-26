@@ -30,7 +30,7 @@
 						<div class="well span8">
 							<p><u><b>Transaction History</b></u></p>
 							</br>
-							<p>Latest Transation</p>
+							<p>Latest Transaction</p>
 							<table class="table table-bordered">
 								<tr>
 									<th>Date/Time</th>
@@ -38,21 +38,30 @@
 									<th>Tag</th>
 									<th>Amount</th>
 								</tr>
+								{% for transaction in transactions %}
 								<tr>
-									<td>{{date}}  {{time}}</td>
-									<td>{{desc}}</td>
-									<td>{{tag}}</td>
-									<td>{{amount}}</td>
+									<input type="hidden" name="entity_id" value="{{transaction.ID}}">
+									<input type="hidden" name="current_index" value="{{current_index}}">
+									<td>{{transaction.date}} {{transaction.time}}</td>
+									<td>{{transaction.description}}</td>
+									<td>{{transaction.tag}}</td>
+									<td>{{transaction.amount}}</td>										
 								</tr>
+								{% endfor %}
 							</table>
 							<center>
-								<form action="/transuccessful" method="post">
+								<form action="/history" method="get">
+									<input type="hidden" name="current_index" value="{{current_index}}">
+									{% if current_index - 5 >= 0 %}
 									<button type="submit" name="navigation" class="btn btn-info" value="left">
 										<i class="glyphicon glyphicon-chevron-left"></i>
 									</button>
+									{% endif %}
+									{% if transactions_size > current_index + 5 %}
 									<button type="submit" name="navigation" class="btn btn-info" value="right">
 										<i class="glyphicon glyphicon-chevron-right"></i>
 									</button>
+									{% endif %}									
 								</form>
 							</center>
 						</div>

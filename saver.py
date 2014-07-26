@@ -41,7 +41,8 @@ class UserSummary(ndb.Model):
     year = ndb.IntegerProperty()
     total_income = ndb.StringProperty()
     total_savings = ndb.StringProperty()
-    total_budget = ndb.StringProperty()
+    total_monthly_budget = ndb.StringProperty()
+    total_yearly_budget = ndb.StringProperty()
     total_expenses = ndb.StringProperty()
     total_food_expenses = ndb.StringProperty()
     total_entertainment_expenses = ndb.StringProperty()
@@ -49,14 +50,16 @@ class UserSummary(ndb.Model):
     total_transport_expenses = ndb.StringProperty()
     total_savings_expenses = ndb.StringProperty()
     total_others_expenses = ndb.StringProperty()
-    budget_available = ndb.StringProperty()
+    monthly_budget_available = ndb.StringProperty()
+    yearly_budget_available = ndb.StringProperty()
 
     def initialization(self): #initialize all variable to "0.00"
         self.month = datetime.datetime.now().month
         self.year = datetime.datetime.now().year
         self.total_income = "0.00"
         self.total_savings = "0.00"
-        self.total_budget = "0.00"
+        self.total_monthly_budget = "0.00"
+        self.total_yearly_budget = "0.00"
         self.total_expenses = "0.00"
         self.total_food_expenses = "0.00"
         self.total_entertainment_expenses = "0.00"
@@ -64,7 +67,8 @@ class UserSummary(ndb.Model):
         self.total_transport_expenses = "0.00"
         self.total_savings_expenses = "0.00"
         self.total_others_expenses = "0.00"
-        self.budget_available = "0.00"
+        self.monthly_budget_available = "0.00"
+        self.yearly_budget_available = "0.00"
 
 class Transaction(ndb.Model):
     # Models a transaction with description, tag, amount, date.
@@ -283,7 +287,8 @@ class TransactionSuccessfulPage(webapp2.RequestHandler):
 
             # update available budget_available
             if tag != 'income':
-                summary.budget_available = two_digits(str(float(summary.budget_available) - float(amount)))
+                summary.monthly_budget_available = two_digits(str(float(summary.monthly_budget_available) - float(amount)))
+                summary.yearly_budget_available = two_digits(str(float(summary.yearly_budget_available) - float(amount)))
 
             summary.put()
 
@@ -301,30 +306,22 @@ class MonthlyBudgetPage(webapp2.RequestHandler):
                         
         if user: #signed in already
             
-            info = Budgets.query(Budgets.user == user, Budgets.period == 'Monthly').fetch()
+            budgets = Budgets.query(Budgets.user == user, Budgets.period == 'Monthly').fetch()
+            summary = UserSummary.query(UserSummary.user == user).fetch()
             #initialize value to empty string
-            food = ''
-            entertainment = ''
-            accommodation = ''
-            transport = ''
-            others = ''
-
-            if len(info) == 1: #monthly budget was set before
-                #convert float into two digits string
-                food = two_digits(info[0].food)
-                entertainment = two_digits(info[0].entertainment)
-                accommodation = two_digits(info[0].accommodation)
-                transport = two_digits(info[0].transport)
-                others = two_digits(info[0].others)
+            monthly_budget = {'food' : '0.00', 'entertainment' : '0.00', 'accommodation' : '0.00', 'transport' : '0.00', 'other' : '0.00'}
+            
+            if len(budgets) == 1: #monthly budget was set before
+                monthly_budget['food'] = budgets[0].food
+                monthly_budget['entertainment'] = budgets[0].entertainment
+                monthly_budget['accommodation'] = budgets[0].accommodation
+                monthly_budget['transport'] = budgets[0].transport
+                monthly_budget['others'] = budgets[0].others
             
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
-                'food': food,
-                'entertainment': entertainment,
-                'accommodation': accommodation,
-                'transport': transport,
-                'others': others
+                'monthly_budget': monthly_budget
             }
             template = jinja_environment.get_template('monthlybudget.html')
             self.response.out.write(template.render(template_values))
@@ -337,22 +334,22 @@ class YearlyBudgetPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user: #signed in already
-            info = Budgets.query(Budgets.user == user, Budgets.period == 'Yearly').fetch()
+            budgets = Budgets.query(Budgets.user == user, Budgets.period == 'Yearly').fetch()
+            summary = UserSummary.query(UserSummary.user == user).fetch()
             #initialize value to empty string
-            food = ''
-            entertainment = ''
-            accommodation = ''
-            transport = ''
-            others = ''
+            food = '0.00'
+            entertainment = '0.00'
+            accommodation = '0.00'
+            transport = '0.00'
+            others = '0.00'
 
-            if len(info) == 1: #yearly budget was set before
-                #convert float into two digits string
-                food = two_digits(info[0].food)
-                entertainment = two_digits(info[0].entertainment)
-                accommodation = two_digits(info[0].accommodation)
-                transport = two_digits(info[0].transport)
-                others = two_digits(info[0].others)
-            
+            if len(budgets) == 1: #yearly budget was set before
+                food = budgets[0].food
+                entertainment = budgets[0].entertainment
+                accommodation = budgets[0].accommodation
+                transport = budgets[0].transport
+                others = budgets[0].others
+                
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
@@ -414,16 +411,25 @@ class BudgetSuccessfulPage(webapp2.RequestHandler):
             budgets.others = others
             budgets.put()
 
-            # construct or update UserSummary object
+            # construct or update UserSummary object  
             user_summary = UserSummary.query(UserSummary.user == user).fetch()
+            # construct if not exist
             if len(user_summary) == 1:
                 summary = user_summary[0]
             else:
                 summary = UserSummary()
                 summary.initialization()
-                
-            summary.total_budget = two_digits(str(float(food) + float(entertainment) + float(accommodation) + float(transport) + float(others)))
-            summary.budget_available = two_digits(str(float(summary.total_budget) - float(summary.total_expenses)))
+            # update accordingly to the period
+            if period == 'Monthly':
+                summary.total_monthly_budget = str(float(food) + float(entertainment) + float(accommodation) + float(transport) + float(others))
+                summary.monthly_budget_available = str(float(summary.total_monthly_budget) - float(summary.total_expenses))
+            elif period == 'Yearly':
+                summary.total_yearly_budget = str(float(food) + float(entertainment) + float(accommodation) + float(transport) + float(others))
+                # count total year expenses
+                total_yearly_expenses = 0
+                for monthly_summary in user_summary:
+                    total_yearly_expenses += float(monthly_summary.total_expenses)
+                summary.yearly_budget_available = str(float(summary.total_yearly_budget) - total_yearly_expenses) 
             summary.put()
             
             template = jinja_environment.get_template('budgetsuccessful.html')
@@ -458,7 +464,7 @@ class SummaryPage(webapp2.RequestHandler):
             # initialize the variable in summary and retrieve if exists
             total_income = "0.00"
             total_savings = "0.00"
-            total_budget = "0.00"
+            total_monthly_budget = "0.00"
             total_expenses = "0.00"
             total_food_expenses = "0.00"
             total_entertainment_expenses = "0.00"
@@ -474,7 +480,7 @@ class SummaryPage(webapp2.RequestHandler):
             if len(user_summary) == 1: # user summary exists
                 total_income = user_summary[0].total_income
                 total_savings = user_summary[0].total_savings
-                total_budget = user_summary[0].total_budget
+                total_monthly_budget = user_summary[0].total_monthly_budget
                 total_expenses = user_summary[0].total_expenses
                 total_food_expenses = user_summary[0].total_food_expenses
                 total_entertainment_expenses = user_summary[0].total_entertainment_expenses
@@ -494,7 +500,7 @@ class SummaryPage(webapp2.RequestHandler):
                 'month': datetime.datetime.now().strftime('%B'),
                 'total_income': total_income,
                 'total_savings': total_savings,
-                'total_budget': total_budget,
+                'total_monthly_budget': total_monthly_budget,
                 'total_expenses': total_expenses,
                 'total_food_expenses': total_food_expenses,
                 'total_entertainment_expenses': total_entertainment_expenses,

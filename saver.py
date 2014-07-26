@@ -153,11 +153,13 @@ class DeleteTransaction(webapp2.RequestHandler):
     def post(self):
         user = users.get_current_user()
         transaction_to_be_deleted = Transaction.get_by_id(int(self.request.get('entity_id')))
+        address = self.request.get('address')
     
         template_values = {
             'user_mail': users.get_current_user().email(),
             'logout': users.create_logout_url(self.request.host_url),
-            'transaction': transaction_to_be_deleted
+            'transaction': transaction_to_be_deleted,
+            'address': address,
         }
         transaction_to_be_deleted.key.delete()
 

@@ -45,7 +45,16 @@
 									<td>{{transaction.date}} {{transaction.time}}</td>
 									<td>{{transaction.description}}</td>
 									<td>{{transaction.tag}}</td>
-									<td>{{transaction.amount}}</td>										
+									<td>{{transaction.amount}}</td>
+									<td>
+										<form action="/deletetransaction" method="post">
+											<input type="hidden" name="entity_id" value="{{transaction.ID}}">
+											<input type="hidden" name="address" value="/history">
+											<button type="submit" class="btn btn-danger">
+												<i class="glyphicon glyphicon-trash"></i>
+											</button>
+										</form>
+									</td>									
 								</tr>
 								{% endfor %}
 							</table>

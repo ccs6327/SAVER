@@ -44,13 +44,20 @@
 					<div class="well span7" id="tips_content">
 						<p>{{tips.content}}</p>
 					</div>
+					</br>
+					</br>
 					<center>
-					<div>
-						<form method="get" action="/tipssharing">
-							<input type="hidden" name="current_index" value="{{current_index}}">
-							<button type="submit" class="btn btn-primary">Back</button>
-						</form>
-					</div>
+						<div class="rating">
+							<p> ?How you think about it </p>
+							<p> !Rate now </p>
+							<span>☆</span><span>☆</span><span>☆</span><span>☆</span><span>☆</span>
+						</div>
+						<div>
+							<form method="get" action="/tipssharing">
+								<input type="hidden" name="current_index" value="{{current_index}}">
+								<button type="submit" class="btn btn-primary">Back</button>
+							</form>
+						</div>
 					</center>
 				</div>
 			</table>

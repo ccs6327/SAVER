@@ -108,7 +108,7 @@ class UserPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user:  # signed in already
-            summary = UserSummary.query(UserSummary.user == user).fetch()
+            summary = UserSummary.query(UserSummary.user == user, UserSummary.month == datetime.datetime.now().month, UserSummary.year == datetime.datetime.now().year).fetch()
             history = Transaction.query(Transaction.user == user).order(-Transaction.added_time).fetch()
 
             transaction = ""
@@ -161,6 +161,8 @@ class DeleteTransaction(webapp2.RequestHandler):
         user = users.get_current_user()
         transaction_to_be_deleted = Transaction.get_by_id(int(self.request.get('entity_id')))
         address = self.request.get('address')
+
+        transaction_date = transaction_to_be_deleted.date
     
         template_values = {
             'user_mail': users.get_current_user().email(),
@@ -171,7 +173,7 @@ class DeleteTransaction(webapp2.RequestHandler):
         transaction_to_be_deleted.key.delete()
 
         #retrieve UserSummary object and update it after deletion
-        summary = UserSummary.query(UserSummary.user == user, UserSummary.year == datetime.datetime.now().year, UserSummary.month == datetime.datetime.now().month).fetch()[0]
+        summary = UserSummary.query(UserSummary.user == user, UserSummary.year == transaction_date.year, UserSummary.month == transaction_date.month).fetch()[0]
 
         # set the variable tag and amount
         tag = transaction_to_be_deleted.tag
@@ -262,12 +264,17 @@ class TransactionSuccessfulPage(webapp2.RequestHandler):
             transaction.put()
 
             # construct or update UserSummary object and store into database
-            user_summary = UserSummary.query(UserSummary.user == user, UserSummary.year == datetime.datetime.now().year, UserSummary.month == datetime.datetime.now().month).fetch()
+            user_summary = UserSummary.query(UserSummary.user == user, UserSummary.year == year, UserSummary.month == month).fetch()
             if len(user_summary) == 1:
                 summary = user_summary[0]
             else:
                 summary = UserSummary()
                 summary.initialization()
+                # prevents user first add previous month transactions in current month
+                if summary.month != month:
+                    summary.month = month
+                if summary.year != year:
+                    summary.year = year
 
             # update total tag amount
             if tag == 'food':
@@ -430,9 +437,19 @@ class OverviewPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user: #signed in already
+
+            # construct info for current date
+            today = datetime.datetime.now()
+
+            exist = {'last_month': False, 'two_month_before': False, 'three_month_before': False}
+
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
+                'current_month': today.strftime('%B %Y'),
+                'last_month': datetime.date(day = 1, month = today.month - 1, year = today.year).strftime('%B %Y'),
+                'two_month_before': datetime.date(day = 1, month = today.month - 2, year = today.year).strftime('%B %Y'),
+                'three_month_before': datetime.date(day = 1, month = today.month - 3, year = today.year).strftime('%B %Y'),
             }
             template = jinja_environment.get_template('overview.html')
             self.response.out.write(template.render(template_values))
@@ -560,6 +577,69 @@ class ChartViewPage(webapp2.RequestHandler):
                 'summary': summary
             }
             template = jinja_environment.get_template('chartview.html')
+            self.response.out.write(template.render(template_values))
+        else:
+            self.redirect(self.request.host_url)
+
+class PastSummaryPage(webapp2.RequestHandler):
+    """ Handler for the past summary page"""
+
+    def get(self):
+        user = users.get_current_user()
+        if user: #signed in already
+
+            # get user summary and budgets of the month requested
+            if self.request.get('month'):
+                requested_month = datetime.datetime.now().month - int(self.request.get('month'))
+                requested_year = datetime.datetime.now().year
+                if requested_month < 0: # last year
+                    requested_month = requested_month + 12
+                    requested_year = requested_year - 1
+                user_summary = UserSummary.query(UserSummary.user == user, UserSummary.month == requested_month, UserSummary.year == requested_year).fetch()
+                budgets = Budgets.query(Budgets.user == user, Budgets.month == requested_month, Budgets.year == requested_year).fetch()
+            else:
+                self.redirect(self.request.host_url)
+
+            # initialize the variable in summary and retrieve if exists
+            summary = {'total_income': '0.00',
+                       'total_savings': '0.00',
+                       'total_monthly_budget': '0.00',
+                       'total_expenses': '0.00',
+                       'total_food_expenses' : '0.00',
+                       'total_entertainment_expenses' : '0.00',
+                       'total_accommodation_expenses' : '0.00',
+                       'total_transport_expenses' : '0.00',
+                       'total_others_expenses' : '0.00',
+                       'total_food_budget' : '0.00',
+                       'total_entertainment_budget' : '0.00',
+                       'total_accommodation_budget' : '0.00',
+                       'total_transport_budget' : '0.00',
+                       'total_others_budget' : '0.00'}
+
+            if len(user_summary) == 1: # user summary exists
+                summary['total_income'] = user_summary[0].total_income
+                summary['total_savings'] = user_summary[0].total_savings
+                summary['total_monthly_budget'] = user_summary[0].total_monthly_budget
+                summary['total_expenses'] = user_summary[0].total_expenses
+                summary['total_food_expenses'] = user_summary[0].total_food_expenses
+                summary['total_entertainment_expenses'] = user_summary[0].total_entertainment_expenses
+                summary['total_accommodation_expenses'] = user_summary[0].total_accommodation_expenses
+                summary['total_transport_expenses'] = user_summary[0].total_transport_expenses
+                summary['total_others_expenses'] = user_summary[0].total_others_expenses
+            if len(budgets) == 1: # budget exists
+                summary['total_food_budget'] = budgets[0].food
+                summary['total_entertainment_budget'] = budgets[0].entertainment
+                summary['total_accommodation_budget'] = budgets[0].accommodation
+                summary['total_transport_budget'] = budgets[0].transport
+                summary['total_others_budget'] = budgets[0].others
+            
+            template_values = {
+                'user_mail': users.get_current_user().email(),
+                'logout': users.create_logout_url(self.request.host_url),
+                'month': datetime.date(day = 1, month = requested_month, year = requested_year).strftime('%B'),
+                'summary': summary
+            }
+            template = jinja_environment.get_template('pastsummary.html')
             self.response.out.write(template.render(template_values))
         else:
             self.redirect(self.request.host_url)
@@ -733,6 +813,7 @@ app = webapp2.WSGIApplication([('/user', UserPage),
                                ('/summary', SummaryPage),
                                ('/history', TransactionHistoryPage),
                                ('/chart', ChartViewPage),
+                               ('/pastsummary', PastSummaryPage),
                                ('/leaderboard', LeaderboardPage),
                                ('/weeklybestsaver', WeeklyBestSaverPage),
                                ('/yearlybestsaver', YearlyBestSaverPage),

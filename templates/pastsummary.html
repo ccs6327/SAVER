@@ -1,0 +1,107 @@
+<html>
+	<head>
+		<title> $AVER - Summary</title>
+		<link href="../bootstrap/css/bootstrap.css" rel="stylesheet">
+		<link type="text/css" rel="stylesheet" href="../stylesheets/main.css"><script type="text/javascript" src="https://www.google.com/jsapi"></script>
+		<script type="text/javascript">
+			google.load("visualization", "1", {packages:["corechart"]});
+			google.setOnLoadCallback(drawChart);
+			function drawChart() {
+				var data = google.visualization.arrayToDataTable([
+				['Expenditure', '$'],
+				['Food', parseFloat(document.getElementById("total_food_expenses").value)],
+				['Entertainment', parseFloat(document.getElementById("total_entertainment_expenses").value)],
+				['Accommodation', parseFloat(document.getElementById("total_accommodation_expenses").value)],
+				['Transport', parseFloat(document.getElementById("total_transport_expenses").value)],
+				['Others', parseFloat(document.getElementById("total_others_expenses").value)],
+				['Savings', parseFloat(document.getElementById("total_savings").value)],
+				]);
+
+				var options = {
+					title: 'Expenditure Chart({{month}})'
+				};
+
+				var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+				chart.draw(data, options);
+			}
+		</script>
+		<link rel="shortcut icon" href="../images/logo.ico">
+	</head>
+	<body>
+		<center>
+			<div class="well header">
+				<a class="header" href = "/user">$AVER</a>
+				&emsp;
+				&emsp;
+				{{user_mail}}<a class="logout" href="{{logout}}"> logout</a>
+			</div>
+			<div class="container">
+			<table>
+				<tr>
+					<td class="span2">
+						<ul class="nav nav-tabs nav-stacked">
+						<li><a href="/manage">Manage</a></li>
+						<li class="active"><a href="/overview">Overview</a></li>
+						<li><a href="/leaderboard">Leaderboard</a></li>
+						<li><a href="/tipssharing">Tips Sharing</a></li>
+						<li><a href="/about">About</a></li>
+						</ul>
+					</td>
+					<td>
+						<div class="well span8">
+						<p><u>Summary({{month}})</u></p>
+						<p>Total Income($): {{summary['total_income']}}</p>
+						<p>Total Savings($): {{summary['total_savings']}}</p>
+						</br>
+						<table class="table table-bordered">
+							<tr>
+								<th></th>
+								<th>Expenses($)</th>
+								<th>Budget($)</th>
+							</tr>
+							<tr>
+								<th>Total</th>
+								<td>{{summary['total_expenses']}}</td>
+								<td>{{summary['total_monthly_budget']}}</td>
+							</tr>
+							<tr>
+								<th>Food</th>
+								<td>{{summary['total_food_expenses']}}</td>
+								<td>{{summary['total_food_budget']}}</td>
+							</tr>
+							<tr>
+								<th>Entertainment</th>
+								<td>{{summary['total_entertainment_expenses']}}</td>
+								<td>{{summary['total_entertainment_budget']}}</td>
+							</tr>
+							<tr>
+								<th>Accommodation</th>
+								<td>{{summary['total_accommodation_expenses']}}</td>
+								<td>{{summary['total_accommodation_budget']}}</td>
+							</tr>
+							<tr>
+								<th>Transport</th>
+								<td>{{summary['total_transport_expenses']}}</td>
+								<td>{{summary['total_transport_budget']}}</td>
+							</tr>	
+							<tr>
+								<th>Others</th>
+								<td>{{summary['total_others_expenses']}}</td>
+								<td>{{summary['total_others_budget']}}</td>
+							</tr>
+						</table>
+						<div id="piechart" style="width: 618px; height: 500px;"></div>
+						</div>
+					</td>
+				</tr>
+			</table>
+			</div>
+		</center>
+		<input type="hidden" id="total_food_expenses" value="{{summary['total_food_expenses']}}">
+		<input type="hidden" id="total_entertainment_expenses" value="{{summary['total_entertainment_expenses']}}">
+		<input type="hidden" id="total_accommodation_expenses" value="{{summary['total_accommodation_expenses']}}">
+		<input type="hidden" id="total_transport_expenses" value="{{summary['total_transport_expenses']}}">
+		<input type="hidden" id="total_others_expenses" value="{{summary['total_others_expenses']}}">
+		<input type="hidden" id="total_savings" value="{{summary['total_savings']}}">
+	</body>
+</html>

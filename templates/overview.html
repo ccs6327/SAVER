@@ -30,9 +30,15 @@
 							<center>
 							<h1>Overview</h1>
 							<ul class="nav nav-tabs nav-stacked">
-							<li><a href="/summary">Summary</a></li>
+							<li><a href="/summary">{{current_month}} Summary</a></li>
 							<li><a href="/history">Transaction History</a></li>
 							<li><a href="/chart">Chart View</a></li>
+							</ul>
+							</br>
+							<ul class="nav nav-tabs nav-stacked">
+							<li><a href="/pastsummary?month=1">{{last_month}} Summary</a></li>
+							<li><a href="/pastsummary?month=2">{{two_month_before}} Summary</a></li>
+							<li><a href="/pastsummary?month=3">{{three_month_before}} Summary</a></li>
 							</ul>
 							</center>
 							<p align="right">Have good saving tips?</p>

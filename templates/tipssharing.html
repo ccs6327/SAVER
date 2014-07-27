@@ -1,4 +1,5 @@
-	<html>
+<!DOCTYPE HTML>
+<html>
 	<head>
 		<title> $AVER - user</title>
 		<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
@@ -26,53 +27,54 @@
 						<li><a href="/about">About</a></li>
 						</ul>
 					</td>
-				<td>
-					<div class="well span8">
-						<center>
-						<h1>Saving Tips Sharing</h1>
-						</center>
-						</br>
-						</br>
-						<table class="table table-stripped">
-							<tr>
-								<th class="span6">Title</th>
-								<th class="span1">Author</th>
-							</tr>
-							{% for tip in tips %}
-							<tr>
-								<td>
-									<form action="/sharingpost" method="post">
-										<input type="hidden" name="entity_id" value="{{tip.ID}}">
-										<input type="hidden" name="current_index" value="{{current_index}}">
-										<button class="btn btn-block btn-info" type="submit">{{tip.title}}</button>
-									</form>
-								</td>
-								<td>{{tip.user.nickname()}}</td>
-							</tr>
-							{% endfor %}
-						</table>
-						<center>
-							<form action="/tipssharing" method="get">
-								<input type="hidden" name="current_index" value="{{current_index}}">
-								{% if current_index - 5 >= 0 %}
-								<button type="submit" name="navigation" class="btn btn-info" value="left">
-									<i class="glyphicon glyphicon-chevron-left"></i>
-								</button>
-								{% endif %}
-								{% if tips_size > current_index + 5 %}
-								<button type="submit" name="navigation" class="btn btn-info" value="right">
-									<i class="glyphicon glyphicon-chevron-right"></i>
-								</button>
-								{% endif %}
-							</form>
-						</center>
-					</div>
-					<div class="well span8">
-						<p align="middle"><a href="/tipssharingform" class="btn btn-primary">Write your own post here</a></p>
-					</div>
-				</td>
+					<td>
+						<div class="well span8">
+							<center>
+							<h1>Saving Tips Sharing</h1>
+							</center>
+							</br>
+							</br>
+							<table class="table table-stripped">
+								<tr>
+									<th class="span6">Title</th>
+									<th class="span1">Author</th>
+								</tr>
+								{% for tip in tips %}
+								<tr>
+									<td>
+										<form action="/sharingpost" method="post">
+											<input type="hidden" name="entity_id" value="{{tip.ID}}">
+											<input type="hidden" name="current_index" value="{{current_index}}">
+											<button class="btn btn-block btn-info" type="submit">{{tip.title}}</button>
+										</form>
+									</td>
+									<td>{{tip.user.nickname()}}</td>
+								</tr>
+								{% endfor %}
+							</table>
+							<center>
+								<form action="/tipssharing" method="get">
+									<input type="hidden" name="current_index" value="{{current_index}}">
+									{% if current_index - 5 >= 0 %}
+									<button type="submit" name="navigation" class="btn btn-info" value="left">
+										<i class="glyphicon glyphicon-chevron-left"></i>
+									</button>
+									{% endif %}
+									{% if tips_size > current_index + 5 %}
+									<button type="submit" name="navigation" class="btn btn-info" value="right">
+										<i class="glyphicon glyphicon-chevron-right"></i>
+									</button>
+									{% endif %}
+								</form>
+							</center>
+						</div>
+						<div class="well span8">
+							<p align="middle"><a href="/tipssharingform" class="btn btn-primary">Write your own post here</a></p>
+						</div>
+					</td>
+				</tr>
 			</table>
 			</div>
 		</center>
 	</body>
-	</html>
+</html>

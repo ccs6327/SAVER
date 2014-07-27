@@ -53,7 +53,7 @@ class UserSummary(ndb.Model):
     monthly_budget_available = ndb.StringProperty()
     yearly_budget_available = ndb.StringProperty()
 
-    def initialization(self): #initialize all variable to "0.00"
+    def initialization(self): # initialize all variable to "0.00"
         self.month = datetime.datetime.now().month
         self.year = datetime.datetime.now().year
         self.total_income = "0.00"
@@ -69,6 +69,10 @@ class UserSummary(ndb.Model):
         self.total_others_expenses = "0.00"
         self.monthly_budget_available = "0.00"
         self.yearly_budget_available = "0.00"
+
+    def del_if_empty(self): # delete self if contain no info
+        if self.total_income == '0.00' and self.total_savings == '0.00' and self.total_monthly_budget == '0.00' and self.total_yearly_budget == '0.00' and self.total_expenses == '0.00':
+            self.key.delete()
 
 class Transaction(ndb.Model):
     # Models a transaction with description, tag, amount, date.
@@ -205,6 +209,8 @@ class DeleteTransaction(webapp2.RequestHandler):
             summary.yearly_budget_available = two_digits(str(float(summary.yearly_budget_available) + float(amount)))
 
         summary.put()
+
+        summary.del_if_empty()
         
         template = jinja_environment.get_template('transactiondeletedsuccessful.html')
         self.response.out.write(template.render(template_values))
@@ -420,6 +426,8 @@ class BudgetSuccessfulPage(webapp2.RequestHandler):
                 summary.yearly_budget_available = two_digits(float(summary.total_yearly_budget) - total_yearly_expenses) 
             summary.put()
 
+            summary.del_if_empty()
+            
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
@@ -440,16 +448,30 @@ class OverviewPage(webapp2.RequestHandler):
 
             # construct info for current date
             today = datetime.datetime.now()
+            last_month = datetime.date(day = 1, month = today.month - 1, year = today.year)
+            two_month_before = datetime.date(day = 1, month = today.month - 2, year = today.year)
+            three_month_before = datetime.date(day = 1, month = today.month - 3, year = today.year)
 
+            # check if past summary info exists
             exist = {'last_month': False, 'two_month_before': False, 'three_month_before': False}
-
+            summary = UserSummary.query(UserSummary.user == user, UserSummary.year == last_month.year, UserSummary.month == last_month.month).fetch()
+            if len(summary) == 1:
+                exist['last_month'] = True
+            summary = UserSummary.query(UserSummary.user == user, UserSummary.year == two_month_before.year, UserSummary.month == two_month_before.month).fetch()
+            if len(summary) == 1:
+                exist['two_month_before'] = True
+            summary = UserSummary.query(UserSummary.user == user, UserSummary.year == three_month_before.year, UserSummary.month == three_month_before.month).fetch()
+            if len(summary) == 1:
+                exist['three_month_before'] = True
+            
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
                 'current_month': today.strftime('%B %Y'),
-                'last_month': datetime.date(day = 1, month = today.month - 1, year = today.year).strftime('%B %Y'),
-                'two_month_before': datetime.date(day = 1, month = today.month - 2, year = today.year).strftime('%B %Y'),
-                'three_month_before': datetime.date(day = 1, month = today.month - 3, year = today.year).strftime('%B %Y'),
+                'exist': exist,
+                'last_month': last_month.strftime('%B %Y'),
+                'two_month_before': two_month_before.strftime('%B %Y'),
+                'three_month_before': three_month_before.strftime('%B %Y'),
             }
             template = jinja_environment.get_template('overview.html')
             self.response.out.write(template.render(template_values))

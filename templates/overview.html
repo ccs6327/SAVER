@@ -36,9 +36,15 @@
 							</ul>
 							</br>
 							<ul class="nav nav-tabs nav-stacked">
+							{% if exist['last_month'] %}
 							<li><a href="/pastsummary?month=1">{{last_month}} Summary</a></li>
+							{% endif %}
+							{% if exist['two_month_before'] %}
 							<li><a href="/pastsummary?month=2">{{two_month_before}} Summary</a></li>
+							{% endif %}
+							{% if exist['three_month_before'] %}
 							<li><a href="/pastsummary?month=3">{{three_month_before}} Summary</a></li>
+							{% endif %}
 							</ul>
 							</center>
 							<p align="right">Have good saving tips?</p>

@@ -63,15 +63,20 @@
 					</br>
 					<center>
 						<div align="left">
-							<p>How you think about it?</p>
-							<p>Rate now!</p>
-							<form action="/ratingsuccessful" method="post">
-								<input type="submit" name="rating" value="Bad" onclick="getConfirmation();"></input>
-								<input type="submit" name="rating" value="Average" onclick="getConfirmation();"></input>
-								<input type="submit" name="rating" value="Good" onclick="getConfirmation();"></input>
-								<input type="submit" name="rating" value="Excellent" onclick="getConfirmation();"></input>
-								<input type="hidden" name="entity_id" value="{{tips.ID}}"></input>
-							</form>
+							<input type="hidden" name="same" value="{{same}}">
+							{% if same %}
+								<p>You had already voted!</p>
+							{% elif not same %}
+								<p>How you think about it?</p>
+								<p>Rate now!</p>
+								<form action="/ratingsuccessful" method="post">
+									<input type="submit" name="rating" value="Bad" onclick="getConfirmation();"></input>
+									<input type="submit" name="rating" value="Average" onclick="getConfirmation();"></input>
+									<input type="submit" name="rating" value="Good" onclick="getConfirmation();"></input>
+									<input type="submit" name="rating" value="Excellent" onclick="getConfirmation();"></input>
+									<input type="hidden" name="entity_id" value="{{tips.ID}}"></input>
+								</form>
+							{% endif %}
 						</div>
 						<div align="right">
 							<form method="get" action="/tipssharing">

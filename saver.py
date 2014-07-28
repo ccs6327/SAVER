@@ -105,6 +105,11 @@ class Tips(ndb.Expando):
     datetime = ndb.DateTimeProperty(auto_now_add=True)
     score = ndb.IntegerProperty()
     email_list = ndb.StringProperty(repeated=True)
+
+class Leaderboard(ndb.Model):
+    # Models a leaderboard with score.
+    score = ndb.IntegerProperty()
+    ID = ndb.IntegerProperty()
     
 #Handler
 class UserPage(webapp2.RequestHandler):
@@ -786,11 +791,21 @@ class SharingSuccessfulPage(webapp2.RequestHandler):
     def post(self):
         user = users.get_current_user()
         if user: #signed in already
+            leaderboard = LeaderBoard()
+            leaderboard.score = 0
+            leaderboard.put()
+
             tips = Tips()
             tips.title = self.request.get('Title')
             tips.content = self.request.get('Content')
             tips.score = 0
+            temp_email_list = tips.email_list
+            temp_email_list.append(users.get_current_user().email())
+            tips.email_list = temp_email_list
             tips.put()
+
+            leaderboard.ID = int(leaderboard.key.id())
+            leaderboard.put()
             tips.ID = int(tips.key.id())
             tips.put()
             
@@ -812,13 +827,20 @@ class SharingPostPage(webapp2.RequestHandler):
         if user: #signed in already
 
             tips = Tips.get_by_id(int(self.request.get('entity_id')))
+            same = False
+            
+            for emails in tips.email_list:
+                if users.get_current_user().email() == emails:
+                    same = True
+                    break
             
             template_values = {
                 'user': users.get_current_user().nickname(),
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
                 'tips': tips,
-                'current_index': self.request.get('current_index')
+                'current_index': self.request.get('current_index'),
+                'same': same,
             }
             
             template = jinja_environment.get_template('tipssharingpost.html')
@@ -826,7 +848,7 @@ class SharingPostPage(webapp2.RequestHandler):
         else:
             self.redirect(self.request.host_url)
 
-class RatingResultPage(webapp2.RequestHandler):
+class RatingSuccessfulPage(webapp2.RequestHandler):
     """ Handler for the rating successful page"""
 
     def post(self):
@@ -834,6 +856,7 @@ class RatingResultPage(webapp2.RequestHandler):
         if user: #signed in already
 
             tips = Tips.get_by_id(int(self.request.get('entity_id')))
+            leaderboard = Leaderbord.get_by_id(int(self.request.get('entity_id')))
             same = False
             
             for emails in tips.email_list:
@@ -846,33 +869,28 @@ class RatingResultPage(webapp2.RequestHandler):
 
                 if result == "Average":
                     tips.score = tips.score + 1
+                    leaderboard.score = leaderboard.score + 1
                 elif result == "Good":
                     tips.score = tips.score + 2
+                    leaderboard.score = leaderboard.score + 2
                 elif result == "Excellent":
                     tips.score = tips.score + 3
+                    leaderboard.score = leaderboard.score + 3
 
                 temp_email_list = tips.email_list
                 temp_email_list.append(users.get_current_user().email())
                 tips.email_list = temp_email_list
                 tips.put()
+                leaderboard.put()
             
-                template_values = {
-                    'user': users.get_current_user().nickname(),
-                    'user_mail': users.get_current_user().email(),
-                    'logout': users.create_logout_url(self.request.host_url),
-                }
+            template_values = {
+                'user': users.get_current_user().nickname(),
+                'user_mail': users.get_current_user().email(),
+                'logout': users.create_logout_url(self.request.host_url),
+            }
                 
-                template = jinja_environment.get_template('ratingsuccessful.html')
-                self.response.out.write(template.render(template_values))
-            else:
-                template_values = {
-                    'user': users.get_current_user().nickname(),
-                    'user_mail': users.get_current_user().email(),
-                    'logout': users.create_logout_url(self.request.host_url),
-                }
-                
-                template = jinja_environment.get_template('ratingfailed.html')
-                self.response.out.write(template.render(template_values))
+            template = jinja_environment.get_template('ratingsuccessful.html')
+            self.response.out.write(template.render(template_values))
         else:
             self.redirect(self.request.host_url)
 
@@ -898,6 +916,5 @@ app = webapp2.WSGIApplication([('/user', UserPage),
                                ('/sharingformsuccessful', SharingSuccessfulPage),
                                ('/sharingpost', SharingPostPage),
                                ('/deletetransaction', DeleteTransaction),
-                               ('/ratingsuccessful', RatingResultPage),
-                               ('/ratingfailed', RatingResultPage)],
+                               ('/ratingsuccessful', RatingSuccessfulPage)],
                                debug=True)

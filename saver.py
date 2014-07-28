@@ -97,14 +97,15 @@ class Budgets(ndb.Model):
     transport = ndb.StringProperty()
     others = ndb.StringProperty()
     
-class Tips(ndb.Model):
+class Tips(ndb.Expando):
     # Models a tips with title, content and date.
     user = ndb.UserProperty(auto_current_user_add=True)
     ID = ndb.IntegerProperty()
     title = ndb.StringProperty()
     content = ndb.StringProperty()
     datetime = ndb.DateTimeProperty(auto_now_add=True)
-
+    score = ndb.IntegerProperty()
+    
 #Handler
 class UserPage(webapp2.RequestHandler):
     """ Handler for the front page after user login."""
@@ -788,6 +789,7 @@ class SharingSuccessfulPage(webapp2.RequestHandler):
             tips = Tips()
             tips.title = self.request.get('Title')
             tips.content = self.request.get('Content')
+            tips.score = 0
             tips.put()
             tips.ID = int(tips.key.id())
             tips.put()
@@ -818,6 +820,7 @@ class SharingPostPage(webapp2.RequestHandler):
                 'tips': tips,
                 'current_index': self.request.get('current_index')
             }
+            
             template = jinja_environment.get_template('tipssharingpost.html')
             self.response.out.write(template.render(template_values))
         else:
@@ -829,11 +832,25 @@ class RatingSuccessfulPage(webapp2.RequestHandler):
     def post(self):
         user = users.get_current_user()
         if user: #signed in already
+
+            tips = Tips.get_by_id(int(self.request.get('entity_id')))
+
+            result = self.request.get('rating')
+
+            if result == "Average":
+                tips.score = tips.score + 1
+            elif result == "Good":
+                tips.score = tips.score + 2
+            elif result == "Excellent":
+                tips.score = tips.score + 3
+
+            tips.put()
             
             template_values = {
                 'user': users.get_current_user().nickname(),
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
+                'tips': tips,
             }
             
             template = jinja_environment.get_template('ratingsuccessful.html')

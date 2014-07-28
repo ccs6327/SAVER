@@ -66,15 +66,16 @@
 							<p>How you think about it?</p>
 							<p>Rate now!</p>
 							<form action="/ratingsuccessful" method="post">
-								<input type="button" value="Bad" onclick="getConfirmation();"></input>
-								<input type="button" value="Average" onclick="getConfirmation();"></input>
-								<input type="button" value="Good" onclick="getConfirmation();"></input>
-								<input type="button" value="Excellent" onclick="getConfirmation();"></input>
+								<input type="submit" name="rating" value="Bad" onclick="getConfirmation();"></input>
+								<input type="submit" name="rating" value="Average" onclick="getConfirmation();"></input>
+								<input type="submit" name="rating" value="Good" onclick="getConfirmation();"></input>
+								<input type="submit" name="rating" value="Excellent" onclick="getConfirmation();"></input>
+								<input type="hidden" name="entity_id" value="{{tips.ID}}"></input>
 							</form>
 						</div>
 						<div align="right">
 							<form method="get" action="/tipssharing">
-								<input type="hidden" name="current_index" value="{{current_index}}">
+								<input type="hidden" name="current_index" value="{{current_index}}"></input>
 								<button type="submit" class="btn btn-primary">Back</button>
 							</form>
 						</div>

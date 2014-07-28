@@ -256,7 +256,7 @@ class TransactionSuccessfulPage(webapp2.RequestHandler):
                 'desc': description,
                 'tag': tag,
                 'amount': amount,
-                'date': date
+                'date': date,
             }
 
             # construct Transaction object and store into database
@@ -823,6 +823,24 @@ class SharingPostPage(webapp2.RequestHandler):
         else:
             self.redirect(self.request.host_url)
 
+class RatingSuccessfulPage(webapp2.RequestHandler):
+    """ Handler for the rating successful page"""
+
+    def post(self):
+        user = users.get_current_user()
+        if user: #signed in already
+            
+            template_values = {
+                'user': users.get_current_user().nickname(),
+                'user_mail': users.get_current_user().email(),
+                'logout': users.create_logout_url(self.request.host_url),
+            }
+            
+            template = jinja_environment.get_template('ratingsuccessful.html')
+            self.response.out.write(template.render(template_values))
+        else:
+            self.redirect(self.request.host_url)
+
 
 app = webapp2.WSGIApplication([('/user', UserPage),
                                ('/manage', ManagePage),
@@ -844,5 +862,6 @@ app = webapp2.WSGIApplication([('/user', UserPage),
                                ('/tipssharing', TipsSharingPage),
                                ('/sharingformsuccessful', SharingSuccessfulPage),
                                ('/sharingpost', SharingPostPage),
-                               ('/deletetransaction', DeleteTransaction)],
+                               ('/deletetransaction', DeleteTransaction),
+                               ('/ratingsuccessful', RatingSuccessfulPage)],
                                debug=True)

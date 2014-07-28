@@ -4,6 +4,21 @@
 		<link href="../bootstrap/css/bootstrap.css" rel="stylesheet">
 		<link type="text/css" rel="stylesheet" href="../stylesheets/main.css">
 		<link rel="shortcut icon" href="../images/logo.ico">
+		<script type="text/javascript">
+		<!--	
+			function getConfirmation(){
+				var confirmation = confirm("Is this your final choice?");
+				if(confirmation == true){
+					alert("Noted! :)");
+					return true;
+				}
+				else{
+					alert("Think wisely :)");
+					return false;
+				}
+			}
+		//-->
+		</script>
 	</head>
 	<body>
 		<center>
@@ -47,12 +62,17 @@
 					</br>
 					</br>
 					<center>
-						<div class="rating">
-							<p> ?How you think about it </p>
-							<p> !Rate now </p>
-							<span>☆</span><span>☆</span><span>☆</span><span>☆</span><span>☆</span>
+						<div align="left">
+							<p>How you think about it?</p>
+							<p>Rate now!</p>
+							<form action="/ratingsuccessful" method="post">
+								<input type="button" value="Bad" onclick="getConfirmation();"></input>
+								<input type="button" value="Average" onclick="getConfirmation();"></input>
+								<input type="button" value="Good" onclick="getConfirmation();"></input>
+								<input type="button" value="Excellent" onclick="getConfirmation();"></input>
+							</form>
 						</div>
-						<div>
+						<div align="right">
 							<form method="get" action="/tipssharing">
 								<input type="hidden" name="current_index" value="{{current_index}}">
 								<button type="submit" class="btn btn-primary">Back</button>

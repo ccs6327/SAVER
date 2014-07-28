@@ -84,7 +84,6 @@ class Transaction(ndb.Model):
     date = ndb.DateProperty()
     added_time = ndb.DateTimeProperty(auto_now_add=True)
     
-
 class Budgets(ndb.Model):
     # Models a budget which contain every tags' amount and period(monthly or yearly)
     user = ndb.UserProperty(auto_current_user_add=True)
@@ -105,6 +104,7 @@ class Tips(ndb.Expando):
     content = ndb.StringProperty()
     datetime = ndb.DateTimeProperty(auto_now_add=True)
     score = ndb.IntegerProperty()
+    email_list = ndb.StringProperty(repeated=True)
     
 #Handler
 class UserPage(webapp2.RequestHandler):
@@ -826,7 +826,7 @@ class SharingPostPage(webapp2.RequestHandler):
         else:
             self.redirect(self.request.host_url)
 
-class RatingSuccessfulPage(webapp2.RequestHandler):
+class RatingResultPage(webapp2.RequestHandler):
     """ Handler for the rating successful page"""
 
     def post(self):
@@ -834,27 +834,45 @@ class RatingSuccessfulPage(webapp2.RequestHandler):
         if user: #signed in already
 
             tips = Tips.get_by_id(int(self.request.get('entity_id')))
-
-            result = self.request.get('rating')
-
-            if result == "Average":
-                tips.score = tips.score + 1
-            elif result == "Good":
-                tips.score = tips.score + 2
-            elif result == "Excellent":
-                tips.score = tips.score + 3
-
-            tips.put()
+            same = False
             
-            template_values = {
-                'user': users.get_current_user().nickname(),
-                'user_mail': users.get_current_user().email(),
-                'logout': users.create_logout_url(self.request.host_url),
-                'tips': tips,
-            }
+            for emails in tips.email_list:
+                if users.get_current_user().email() == emails:
+                    same = True
+                    break
+
+            if not same:
+                result = self.request.get('rating')
+
+                if result == "Average":
+                    tips.score = tips.score + 1
+                elif result == "Good":
+                    tips.score = tips.score + 2
+                elif result == "Excellent":
+                    tips.score = tips.score + 3
+
+                temp_email_list = tips.email_list
+                temp_email_list.append(users.get_current_user().email())
+                tips.email_list = temp_email_list
+                tips.put()
             
-            template = jinja_environment.get_template('ratingsuccessful.html')
-            self.response.out.write(template.render(template_values))
+                template_values = {
+                    'user': users.get_current_user().nickname(),
+                    'user_mail': users.get_current_user().email(),
+                    'logout': users.create_logout_url(self.request.host_url),
+                }
+                
+                template = jinja_environment.get_template('ratingsuccessful.html')
+                self.response.out.write(template.render(template_values))
+            else:
+                template_values = {
+                    'user': users.get_current_user().nickname(),
+                    'user_mail': users.get_current_user().email(),
+                    'logout': users.create_logout_url(self.request.host_url),
+                }
+                
+                template = jinja_environment.get_template('ratingfailed.html')
+                self.response.out.write(template.render(template_values))
         else:
             self.redirect(self.request.host_url)
 
@@ -880,5 +898,6 @@ app = webapp2.WSGIApplication([('/user', UserPage),
                                ('/sharingformsuccessful', SharingSuccessfulPage),
                                ('/sharingpost', SharingPostPage),
                                ('/deletetransaction', DeleteTransaction),
-                               ('/ratingsuccessful', RatingSuccessfulPage)],
+                               ('/ratingsuccessful', RatingResultPage),
+                               ('/ratingfailed', RatingResultPage)],
                                debug=True)

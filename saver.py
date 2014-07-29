@@ -261,10 +261,13 @@ class TransactionPage(webapp2.RequestHandler):
         user = users.get_current_user()
         if user: #signed in already
             del_datastore_if_outdated()
+
+            min_date = datetime.date(year = datetime.datetime.now().year - 1, month = datetime.datetime.now().month, day = 1)
             
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
+                'min_date': min_date
             }
             template = jinja_environment.get_template('transaction.html')
             self.response.out.write(template.render(template_values))

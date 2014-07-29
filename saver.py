@@ -76,17 +76,17 @@ class UserSummary(ndb.Model):
 
 class Transaction(ndb.Model):
     # Models a transaction with description, tag, amount, date.
-    user = ndb.UserProperty(auto_current_user_add=True)
+    user = ndb.UserProperty(auto_current_user_add = True)
     ID = ndb.IntegerProperty()
     description = ndb.StringProperty()
     tag = ndb.StringProperty()
     amount = ndb.StringProperty()
     date = ndb.DateProperty()
-    added_time = ndb.DateTimeProperty(auto_now_add=True)
+    added_time = ndb.DateTimeProperty(auto_now_add = True)
     
 class Budgets(ndb.Model):
     # Models a budget which contain every tags' amount and period(monthly or yearly)
-    user = ndb.UserProperty(auto_current_user_add=True)
+    user = ndb.UserProperty(auto_current_user_add = True)
     month = ndb.IntegerProperty()
     year = ndb.IntegerProperty()
     period = ndb.StringProperty()
@@ -98,7 +98,7 @@ class Budgets(ndb.Model):
     
 class Tips(ndb.Expando):
     # Models a tips with title, content and date.
-    user = ndb.UserProperty(auto_current_user_add=True)
+    user = ndb.UserProperty(auto_current_user_add = True)
     ID = ndb.IntegerProperty()
     title = ndb.StringProperty()
     content = ndb.StringProperty()
@@ -108,8 +108,8 @@ class Tips(ndb.Expando):
 
 class Leaderboard(ndb.Model):
     # Models a leaderboard with score.
+    user = ndb.UserProperty(auto_current_user_add = True)
     score = ndb.IntegerProperty()
-    ID = ndb.IntegerProperty()
     
 #Handler
 class UserPage(webapp2.RequestHandler):
@@ -120,6 +120,12 @@ class UserPage(webapp2.RequestHandler):
         if user:  # signed in already
             summary = UserSummary.query(UserSummary.user == user, UserSummary.month == datetime.datetime.now().month, UserSummary.year == datetime.datetime.now().year).fetch()
             history = Transaction.query(Transaction.user == user).order(-Transaction.added_time).fetch()
+            leaderboard = Leaderboard.query().order(-Leaderboard.score).fetch()
+
+            top_users = []
+            
+            for user_leaderboard in leaderboard:
+                top_users.append(user_leaderboard.user.nickname())
 
             transaction = ""
             # initialize the variable in transaction history and retrieve if exists
@@ -142,7 +148,8 @@ class UserPage(webapp2.RequestHandler):
                 'total_expenses': total_expenses,
                 'monthly_budget_available': monthly_budget_available,
                 'yearly_budget_available': yearly_budget_available,
-                'transaction': transaction
+                'transaction': transaction,
+                'top_users': top_users
             }
             template = jinja_environment.get_template('userhomepage.html')
             self.response.out.write(template.render(template_values))
@@ -678,41 +685,18 @@ class LeaderboardPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user: #signed in already
+            leaderboard = Leaderboard.query().order(-Leaderboard.score).fetch()
+            top_users = []
+
+            for user_leaderboard in leaderboard:
+                top_users.append(user_leaderboard.user.nickname())
+                
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
+                'top_users': top_users
             }
             template = jinja_environment.get_template('leaderboard.html')
-            self.response.out.write(template.render(template_values))
-        else:
-            self.redirect(self.request.host_url)
-
-class WeeklyBestSaverPage(webapp2.RequestHandler):
-    """ Handler for the weekly best saver page"""
-
-    def get(self):
-        user = users.get_current_user()
-        if user: #signed in already
-            template_values = {
-                'user_mail': users.get_current_user().email(),
-                'logout': users.create_logout_url(self.request.host_url),
-            }
-            template = jinja_environment.get_template('weeklyBestSaver.html')
-            self.response.out.write(template.render(template_values))
-        else:
-            self.redirect(self.request.host_url)
-
-class YearlyBestSaverPage(webapp2.RequestHandler):
-    """ Handler for the yearly best saver page"""
-
-    def get(self):
-        user = users.get_current_user()
-        if user: #signed in already
-            template_values = {
-                'user_mail': users.get_current_user().email(),
-                'logout': users.create_logout_url(self.request.host_url),
-            }
-            template = jinja_environment.get_template('yearlyBestSaver.html')
             self.response.out.write(template.render(template_values))
         else:
             self.redirect(self.request.host_url)
@@ -791,10 +775,6 @@ class SharingSuccessfulPage(webapp2.RequestHandler):
     def post(self):
         user = users.get_current_user()
         if user: #signed in already
-            leaderboard = LeaderBoard()
-            leaderboard.score = 0
-            leaderboard.put()
-
             tips = Tips()
             tips.title = self.request.get('Title')
             tips.content = self.request.get('Content')
@@ -803,9 +783,6 @@ class SharingSuccessfulPage(webapp2.RequestHandler):
             temp_email_list.append(users.get_current_user().email())
             tips.email_list = temp_email_list
             tips.put()
-
-            leaderboard.ID = int(leaderboard.key.id())
-            leaderboard.put()
             tips.ID = int(tips.key.id())
             tips.put()
             
@@ -827,20 +804,19 @@ class SharingPostPage(webapp2.RequestHandler):
         if user: #signed in already
 
             tips = Tips.get_by_id(int(self.request.get('entity_id')))
-            same = False
+            voted = False
             
-            for emails in tips.email_list:
-                if users.get_current_user().email() == emails:
-                    same = True
+            for email in tips.email_list:
+                if user.email() == email:
+                    voted = True
                     break
             
             template_values = {
-                'user': users.get_current_user().nickname(),
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
                 'tips': tips,
                 'current_index': self.request.get('current_index'),
-                'same': same,
+                'voted': voted,
             }
             
             template = jinja_environment.get_template('tipssharingpost.html')
@@ -856,17 +832,20 @@ class RatingSuccessfulPage(webapp2.RequestHandler):
         if user: #signed in already
 
             tips = Tips.get_by_id(int(self.request.get('entity_id')))
-            leaderboard = Leaderbord.get_by_id(int(self.request.get('entity_id')))
-            same = False
-            
-            for emails in tips.email_list:
-                if users.get_current_user().email() == emails:
-                    same = True
-                    break
+            leaderboard = Leaderboard.query(Leaderboard.user == tips.user).fetch()
 
-            if not same:
-                result = self.request.get('rating')
+            # create or retrieve leaderboard object
+            if len(leaderboard) == 1:
+                leaderboard = leaderboard[0]
+            else:
+                leaderboard = Leaderboard()
+                leaderboard.user = tips.user
+                leaderboard.score = 0
+                leaderboard.put()
 
+            # Add score to the leaderboard and add voter's email to the email list
+            result = self.request.get('rating')
+            if result:
                 if result == "Average":
                     tips.score = tips.score + 1
                     leaderboard.score = leaderboard.score + 1
@@ -884,7 +863,6 @@ class RatingSuccessfulPage(webapp2.RequestHandler):
                 leaderboard.put()
             
             template_values = {
-                'user': users.get_current_user().nickname(),
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
             }
@@ -908,8 +886,6 @@ app = webapp2.WSGIApplication([('/user', UserPage),
                                ('/chart', ChartViewPage),
                                ('/pastsummary', PastSummaryPage),
                                ('/leaderboard', LeaderboardPage),
-                               ('/weeklybestsaver', WeeklyBestSaverPage),
-                               ('/yearlybestsaver', YearlyBestSaverPage),
                                ('/about', AboutPage),
                                ('/tipssharingform', TipsSharingFormPage),
                                ('/tipssharing', TipsSharingPage),

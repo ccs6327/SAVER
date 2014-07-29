@@ -64,9 +64,9 @@
 					<center>
 						<div align="left">
 							<input type="hidden" name="same" value="{{same}}">
-							{% if same %}
+							{% if voted %}
 								<p>You had already voted!</p>
-							{% elif not same %}
+							{% elif not voted %}
 								<p>How you think about it?</p>
 								<p>Rate now!</p>
 								<form action="/ratingsuccessful" method="post">

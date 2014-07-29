@@ -25,18 +25,19 @@
 						<li><a href="/about">About</a></li>
 						</ul>
 					</td>
-				<td>
-				<div class="well span8">
-					<center>
-					<h1>Leaderboard</h1>
-					<ul class="nav nav-tabs nav-stacked">
-					<li><a href="/weeklybestsaver">Best Saver of the Week</a></li>
-					<li><a href="/yearlybestsaver">Best Saver of the Year</a></li>
-					</ul>
-					</center>
-					<p align="right">Have good saving tips?</p>
-					<p align="right"><a href="/tipssharingform" class="btn btn-primary">Share with us now!</a></p>	
-				</div>
+					<td>
+						<div class="well span8">
+							<center>
+							<h1>Leaderboard</h1>
+							<ol>
+							{%for top_user in top_users %}
+									<li>{{top_user}}</li>
+							{% endfor %}
+							</ol>
+							</center>
+						</div>
+					</td>
+				</tr>
 			</table>
 			</div>
 		</center>

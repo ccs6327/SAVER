@@ -57,3 +57,8 @@ indexes:
   - name: user
   - name: time
     direction: desc
+
+- kind: UserSummary
+  properties:
+  - name: month
+  - name: year

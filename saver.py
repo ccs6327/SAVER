@@ -32,8 +32,26 @@ def two_digits(amount):
         else:
             return amount
 
-#Datastore Definition
+def del_datastore_if_outdated():
+    # calculate the latest date to be kept
+    current_year = datetime.datetime.now().year
+    current_month = datetime.datetime.now().month
+    date_to_be_kept = datetime.date(day = 1, month = current_month, year = current_year - 1)
+    
+    # clear outdated summary data
+    summaries = UserSummary.query().fetch()                                        
+    for summary in summaries:
+        summary_date = datetime.date(day = 1, month = summary.month, year = summary.year)
+        if summary_date < date_to_be_kept:
+            summary.key.delete()
 
+    # clear outdated transaction data
+    transactions = Transaction.query().fetch()
+    for transaction in transactions:
+        if transaction.date < date_to_be_kept:
+            transaction.key.delete()
+    
+#Datastore Definition
 class UserSummary(ndb.Model):
     # Models a summary of user's total expenses, budgets, incomes, savings etc
     user = ndb.UserProperty(auto_current_user_add=True)
@@ -87,8 +105,6 @@ class Transaction(ndb.Model):
 class Budgets(ndb.Model):
     # Models a budget which contain every tags' amount and period(monthly or yearly)
     user = ndb.UserProperty(auto_current_user_add = True)
-    month = ndb.IntegerProperty()
-    year = ndb.IntegerProperty()
     period = ndb.StringProperty()
     food = ndb.StringProperty()
     entertainment = ndb.StringProperty()
@@ -118,6 +134,8 @@ class UserPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user:  # signed in already
+            del_datastore_if_outdated()
+            
             summary = UserSummary.query(UserSummary.user == user, UserSummary.month == datetime.datetime.now().month, UserSummary.year == datetime.datetime.now().year).fetch()
             history = Transaction.query(Transaction.user == user).order(-Transaction.added_time).fetch()
             leaderboard = Leaderboard.query().order(-Leaderboard.score).fetch()
@@ -160,8 +178,11 @@ class ManagePage(webapp2.RequestHandler):
     """ Handler for the manage page"""
 
     def get(self):
+        
         user = users.get_current_user()
         if user: #signed in already
+            del_datastore_if_outdated()
+            
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
@@ -219,11 +240,16 @@ class DeleteTransaction(webapp2.RequestHandler):
         # update available budget_available
         if tag != 'income':
             summary.monthly_budget_available = two_digits(str(float(summary.monthly_budget_available) + float(amount)))
-            summary.yearly_budget_available = two_digits(str(float(summary.yearly_budget_available) + float(amount)))
-
         summary.put()
 
         summary.del_if_empty()
+        
+        if transaction_to_be_deleted.date.year == datetime.datetime.now().year:
+            summaries = UserSummary.query(UserSummary.user == user).fetch()
+            for summary in summaries:
+                if summary.year == datetime.datetime.now().year and summary.month >= transaction_to_be_deleted.date.month:
+                    summary.yearly_budget_available = two_digits(str(float(summary.yearly_budget_available) + float(amount)))
+                    summary.put()
         
         template = jinja_environment.get_template('transactiondeletedsuccessful.html')
         self.response.out.write(template.render(template_values))
@@ -234,6 +260,8 @@ class TransactionPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user: #signed in already
+            del_datastore_if_outdated()
+            
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
@@ -318,9 +346,15 @@ class TransactionSuccessfulPage(webapp2.RequestHandler):
             # update available budget_available
             if tag != 'income':
                 summary.monthly_budget_available = two_digits(str(float(summary.monthly_budget_available) - float(amount)))
-                summary.yearly_budget_available = two_digits(str(float(summary.yearly_budget_available) - float(amount)))
 
             summary.put()
+        
+            if transaction.date.year == datetime.datetime.now().year:
+                summaries = UserSummary.query(UserSummary.user == user).fetch()
+                for summary in summaries:
+                    if summary.year == datetime.datetime.now().year and summary.month >= transaction.date.month:
+                        summary.yearly_budget_available = two_digits(str(float(summary.yearly_budget_available) - float(amount)))
+                        summary.put()
 
             # render webpage
             template = jinja_environment.get_template('transactionsuccessful.html')
@@ -335,6 +369,7 @@ class MonthlyBudgetPage(webapp2.RequestHandler):
         user = users.get_current_user()
                         
         if user: #signed in already
+            del_datastore_if_outdated()
             
             budgets = Budgets.query(Budgets.user == user, Budgets.period == 'Monthly').fetch()
             summary = UserSummary.query(UserSummary.user == user).fetch()
@@ -364,6 +399,8 @@ class YearlyBudgetPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user: #signed in already
+            del_datastore_if_outdated()
+            
             budgets = Budgets.query(Budgets.user == user, Budgets.period == 'Yearly').fetch()
             summary = UserSummary.query(UserSummary.user == user).fetch()
             #initialize value to empty string
@@ -398,17 +435,15 @@ class BudgetSuccessfulPage(webapp2.RequestHandler):
 
             # construct or update Budgets object and store into database
             if period == 'Monthly': #check if budget of current year and month exists
-                old_budgets = Budgets.query(Budgets.user == user, Budgets.period == period, Budgets.month == datetime.datetime.now().month, Budgets.year == datetime.datetime.now().year).fetch()    
+                old_budgets = Budgets.query(Budgets.user == user, Budgets.period == period).fetch()    
             elif period == 'Yearly': #check if budget of current year exists
-                old_budgets = Budgets.query(Budgets.user == user, Budgets.period == period, Budgets.year == datetime.datetime.now().year).fetch()
+                old_budgets = Budgets.query(Budgets.user == user, Budgets.period == period).fetch()
                 
             if len(old_budgets) == 1:
                 budgets = old_budgets[0]
             else:
                 budgets = Budgets()
 
-            budgets.month = datetime.datetime.now().month
-            budgets.year = datetime.datetime.now().year
             budgets.period = period
             budgets.food = two_digits(self.request.get('food'))
             budgets.entertainment = two_digits(self.request.get('entertainment'))
@@ -418,7 +453,7 @@ class BudgetSuccessfulPage(webapp2.RequestHandler):
             budgets.put()
 
             # construct or update UserSummary object  
-            user_summary = UserSummary.query(UserSummary.user == user).fetch()
+            user_summary = UserSummary.query(UserSummary.user == user, UserSummary.month == datetime.datetime.now().month).fetch()
             # construct if not exist
             if len(user_summary) == 1:
                 summary = user_summary[0]
@@ -435,7 +470,8 @@ class BudgetSuccessfulPage(webapp2.RequestHandler):
                 # count total year expenses
                 total_yearly_expenses = 0
                 for monthly_summary in user_summary:
-                    total_yearly_expenses += float(monthly_summary.total_expenses)
+                    if monthly_summary.year == datetime.datetime.now().year: # current year month summary
+                        total_yearly_expenses += float(monthly_summary.total_expenses)
                 summary.yearly_budget_available = two_digits(float(summary.total_yearly_budget) - total_yearly_expenses) 
             summary.put()
 
@@ -458,6 +494,7 @@ class OverviewPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user: #signed in already
+            del_datastore_if_outdated()
 
             # construct info for current date
             today = datetime.datetime.now()
@@ -497,8 +534,10 @@ class SummaryPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user: #signed in already
+            del_datastore_if_outdated()
+            
             user_summary = UserSummary.query(UserSummary.user == user, UserSummary.month == datetime.datetime.now().month, UserSummary.year == datetime.datetime.now().year).fetch()
-            budgets = Budgets.query(Budgets.user == user, Budgets.period == "Monthly", Budgets.month == datetime.datetime.now().month).fetch()
+            budgets = Budgets.query(Budgets.user == user, Budgets.period == "Monthly").fetch()
 
             # initialize the variable in summary and retrieve if exists
             summary = {'total_income': '0.00',
@@ -550,7 +589,9 @@ class TransactionHistoryPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user: #signed in already
-            transactions = Transaction.query().order(-Transaction.added_time).fetch()
+            del_datastore_if_outdated()
+            
+            transactions = Transaction.query().order(Transaction.added_time).fetch()
 
             if self.request.get('current_index'):
                 current_index = int(self.request.get('current_index'))
@@ -587,6 +628,8 @@ class ChartViewPage(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         if user: #signed in already
+            del_datastore_if_outdated()
+            
             user_summary = UserSummary.query(UserSummary.user == user, UserSummary.month == datetime.datetime.now().month, UserSummary.year == datetime.datetime.now().year).fetch()
 
             # initialize the variable in summary and retrieve if exists
@@ -631,7 +674,7 @@ class PastSummaryPage(webapp2.RequestHandler):
                     requested_month = requested_month + 12
                     requested_year = requested_year - 1
                 user_summary = UserSummary.query(UserSummary.user == user, UserSummary.month == requested_month, UserSummary.year == requested_year).fetch()
-                budgets = Budgets.query(Budgets.user == user, Budgets.month == requested_month, Budgets.year == requested_year).fetch()
+                budgets = Budgets.query(Budgets.user == user).fetch()
             else:
                 self.redirect(self.request.host_url)
 

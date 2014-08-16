@@ -594,7 +594,7 @@ class TransactionHistoryPage(webapp2.RequestHandler):
         if user: #signed in already
             del_datastore_if_outdated()
             
-            transactions = Transaction.query().order(Transaction.added_time).fetch()
+            transactions = Transaction.query(Transaction.user == user).order(Transaction.added_time).fetch()
 
             if self.request.get('current_index'):
                 current_index = int(self.request.get('current_index'))

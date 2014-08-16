@@ -44,6 +44,11 @@ indexes:
   properties:
   - name: user
   - name: added_time
+
+- kind: Transaction
+  properties:
+  - name: user
+  - name: added_time
     direction: desc
 
 - kind: Transaction

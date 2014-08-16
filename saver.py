@@ -732,15 +732,30 @@ class LeaderboardPage(webapp2.RequestHandler):
         user = users.get_current_user()
         if user: #signed in already
             leaderboard = Leaderboard.query().order(-Leaderboard.score).fetch()
-            top_users = []
 
-            for user_leaderboard in leaderboard:
-                top_users.append(user_leaderboard.user.nickname())
+            if self.request.get('current_index'):
+                current_index = int(self.request.get('current_index'))
+            else:
+                current_index = 0
+
+            if self.request.get('navigation') == 'left' and current_index - 5 >= 0:
+                current_index = current_index - 5
+            elif self.request.get('navigation') == 'right' and current_index + 5 < len(tips):
+                current_index = current_index + 5
+    
+            leaderboard_size = len(leaderboard)
+
+            if leaderboard_size > current_index + 5:
+                leaderboard = leaderboard[current_index:current_index + 5]
+            else:
+                leaderboard = leaderboard[current_index:leaderboard_size]
                 
             template_values = {
                 'user_mail': users.get_current_user().email(),
                 'logout': users.create_logout_url(self.request.host_url),
-                'top_users': top_users
+                'leaderboard': leaderboard,
+                'current_index': current_index,
+                'leaderboard_size': leaderboard_size
             }
             template = jinja_environment.get_template('leaderboard.html')
             self.response.out.write(template.render(template_values))
@@ -798,10 +813,10 @@ class TipsSharingPage(webapp2.RequestHandler):
     
             tips_size = len(tips)
 
-            if len(tips) > current_index + 5:
+            if tips_size > current_index + 5:
                 tips = tips[current_index:current_index + 5]
             else:
-                tips = tips[current_index:len(tips)]
+                tips = tips[current_index:tips_size]
 
             template_values = {
                 'user_mail': users.get_current_user().email(),

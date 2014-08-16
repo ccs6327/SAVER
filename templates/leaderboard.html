@@ -29,11 +29,31 @@
 						<div class="well span8">
 							<center>
 							<h1>Leaderboard</h1>
-							<ol>
-							{%for top_user in top_users %}
-									<li>{{top_user}}</li>
-							{% endfor %}
-							</ol>
+								<table class="table table-stripped">
+									<tr>
+										<th class="span4">User</th>
+										<th class="span1">Score</th>
+									</tr>
+									{% for leaderboard_user in leaderboard %}
+									<tr>
+										<td>{{leaderboard_user.user.nickname()}}</td>
+										<td>{{leaderboard_user.score}}</td>
+									</tr>
+									{% endfor %}
+								</table>
+								<form action="/leaderboard" method="get">
+									<input type="hidden" name="current_index" value="{{current_index}}">
+									{% if current_index - 5 >= 0 %}
+									<button type="submit" name="navigation" class="btn btn-info" value="left">
+										<i class="glyphicon glyphicon-chevron-left"></i>
+									</button>
+									{% endif %}
+									{% if leaderboard_size > current_index + 5 %}
+									<button type="submit" name="navigation" class="btn btn-info" value="right">
+										<i class="glyphicon glyphicon-chevron-right"></i>
+									</button>
+									{% endif %}
+								</form>
 							</center>
 						</div>
 					</td>
